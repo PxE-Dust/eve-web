@@ -40,109 +40,6 @@ function ScrollFocusSection({ children, id }: { children: ReactNode; id?: string
   );
 }
 
-/* ---------------- FAIRYCORE CANOPY & ARCH OVERLAY ---------------- */
-
-function FairycoreCanopyOverlay() {
-  return (
-    <div className="fixed inset-0 pointer-events-none z-40 overflow-hidden">
-      {/* 1. FAIRY LIGHT GLOW PULLS (TWINKLING STRING LIGHTS) */}
-      <div className="absolute inset-0 z-10 opacity-70">
-        <div className="absolute top-[8%] left-[15%] w-2 h-2 rounded-full bg-[#FFE8AD] shadow-[0_0_12px_4px_rgba(255,232,173,0.8)] animate-pulse" />
-        <div className="absolute top-[14%] left-[22%] w-1.5 h-1.5 rounded-full bg-[#FFF3D1] shadow-[0_0_10px_3px_rgba(255,243,209,0.8)] animate-pulse [animation-delay:0.7s]" />
-        <div className="absolute top-[6%] right-[18%] w-2.5 h-2.5 rounded-full bg-[#FFE8AD] shadow-[0_0_15px_5px_rgba(255,232,173,0.9)] animate-pulse [animation-delay:1.2s]" />
-        <div className="absolute top-[20%] right-[25%] w-2 h-2 rounded-full bg-[#FFF3D1] shadow-[0_0_12px_4px_rgba(255,243,209,0.8)] animate-pulse [animation-delay:0.4s]" />
-        <div className="absolute top-[32%] left-[8%] w-1.5 h-1.5 rounded-full bg-[#FFE8AD] shadow-[0_0_10px_3px_rgba(255,232,173,0.7)] animate-pulse [animation-delay:1.5s]" />
-        <div className="absolute top-[45%] right-[9%] w-2 h-2 rounded-full bg-[#FFF3D1] shadow-[0_0_12px_4px_rgba(255,243,209,0.8)] animate-pulse [animation-delay:0.9s]" />
-      </div>
-
-      {/* 2. TOP DENSE CANOPY (ARCH OVERHANG) */}
-      <svg
-        className="absolute top-0 left-0 w-full h-36 sm:h-48 md:h-60 text-[#142617] drop-shadow-md"
-        preserveAspectRatio="none"
-        viewBox="0 0 1200 200"
-      >
-        <defs>
-          <linearGradient id="canopyGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#122415" stopOpacity="0.98" />
-            <stop offset="70%" stopColor="#1c3621" stopOpacity="0.85" />
-            <stop offset="100%" stopColor="#2a4c30" stopOpacity="0" />
-          </linearGradient>
-          {/* Heart/Ivy Leaf Def */}
-          <g id="ivyLeaf">
-            <path d="M 0 0 C -8 -10, -18 -5, -12 8 C -8 15, 0 22, 0 22 C 0 22, 8 15, 12 8 C 18 -5, 8 -10, 0 0 Z" fill="currentColor" />
-          </g>
-          <g id="hangingVine">
-            <path d="M 0 0 Q 10 40 -5 80 T 5 150 T -2 220" stroke="currentColor" strokeWidth="2" fill="none" />
-            <use href="#ivyLeaf" x="0" y="30" transform="scale(0.8) rotate(15)" />
-            <use href="#ivyLeaf" x="8" y="70" transform="scale(0.9) rotate(-25)" />
-            <use href="#ivyLeaf" x="-6" y="110" transform="scale(0.75) rotate(40)" />
-            <use href="#ivyLeaf" x="5" y="150" transform="scale(0.85) rotate(-10)" />
-            <use href="#ivyLeaf" x="-2" y="190" transform="scale(0.6) rotate(20)" />
-          </g>
-        </defs>
-
-        {/* Dense Base Arch Fill */}
-        <path d="M-20,-10 L1220,-10 L1220,60 Q900,120 600,80 Q300,120 -20,60 Z" fill="url(#canopyGrad)" />
-
-        {/* Overhanging Hanging Leaf Tendrils (Flanking the center) */}
-        <g fill="#1a331e" className="text-[#1a331e]">
-          <use href="#hangingVine" x="60" y="30" transform="scale(1.1)" />
-          <use href="#hangingVine" x="140" y="40" transform="scale(1.3) rotate(5)" />
-          <use href="#hangingVine" x="230" y="25" transform="scale(0.95)" />
-          <use href="#hangingVine" x="320" y="50" transform="scale(0.7) rotate(-5)" />
-
-          {/* Short center dips to keep hero text clear */}
-          <use href="#hangingVine" x="520" y="10" transform="scale(0.35)" />
-          <use href="#hangingVine" x="680" y="10" transform="scale(0.35) rotate(10)" />
-
-          <use href="#hangingVine" x="880" y="45" transform="scale(0.75)" />
-          <use href="#hangingVine" x="970" y="20" transform="scale(1.05) rotate(-8)" />
-          <use href="#hangingVine" x="1060" y="35" transform="scale(1.25)" />
-          <use href="#hangingVine" x="1140" y="15" transform="scale(1)" />
-        </g>
-      </svg>
-
-      {/* 3. LEFT WOODEN PILLAR & WRAPPED FOLIAGE */}
-      <svg
-        className="absolute top-0 left-0 h-full w-24 sm:w-36 md:w-56 text-[#142617]"
-        preserveAspectRatio="none"
-        viewBox="0 0 200 1000"
-      >
-        {/* Trunk / Wooden Pillar shadow */}
-        <path d="M-10,-10 Q40,300 20,600 T30,1010 L-10,1010 Z" fill="#0f1c11" opacity="0.9" />
-        <path d="M15,-10 Q65,250 45,550 T55,1010" stroke="#1c3621" strokeWidth="8" fill="none" opacity="0.6" />
-
-        {/* Wrapped Ivy Garland Layer */}
-        <g fill="#1a351e" className="text-[#1a351e]">
-          <use href="#hangingVine" x="30" y="100" transform="scale(1.2) rotate(-15)" />
-          <use href="#hangingVine" x="50" y="300" transform="scale(1.4) rotate(-5)" />
-          <use href="#hangingVine" x="40" y="550" transform="scale(1.1) rotate(-10)" />
-          <use href="#hangingVine" x="60" y="750" transform="scale(1.3) rotate(-20)" />
-        </g>
-      </svg>
-
-      {/* 4. RIGHT WOODEN PILLAR & WRAPPED FOLIAGE */}
-      <svg
-        className="absolute top-0 right-0 h-full w-24 sm:w-36 md:w-56 text-[#142617]"
-        preserveAspectRatio="none"
-        viewBox="0 0 200 1000"
-      >
-        {/* Trunk / Wooden Pillar shadow */}
-        <path d="M210,-10 Q160,300 180,600 T170,1010 L210,1010 Z" fill="#0f1c11" opacity="0.9" />
-        <path d="M185,-10 Q135,250 155,550 T145,1010" stroke="#1c3621" strokeWidth="8" fill="none" opacity="0.6" />
-
-        {/* Wrapped Ivy Garland Layer */}
-        <g fill="#1a351e" className="text-[#1a351e]">
-          <use href="#hangingVine" x="150" y="80" transform="scale(1.2) rotate(15)" />
-          <use href="#hangingVine" x="130" y="280" transform="scale(1.35) rotate(10)" />
-          <use href="#hangingVine" x="140" y="520" transform="scale(1.15) rotate(5)" />
-          <use href="#hangingVine" x="120" y="720" transform="scale(1.3) rotate(18)" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
 /* ---------------- MAIN APP ---------------- */
 
 export default function App() {
@@ -159,9 +56,6 @@ export default function App() {
 
   return (
     <div className="relative bg-[#EFF4EC] text-[#273229] min-h-screen antialiased overflow-x-hidden font-['Plus_Jakarta_Sans',sans-serif]">
-      {/* Fairycore Wedding Arch Canopy Frame */}
-      <FairycoreCanopyOverlay />
-
       <motion.div
         style={{ y: bgY }}
         className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(194,214,188,0.5),rgba(239,244,236,0.98))] z-0 pointer-events-none"
@@ -252,7 +146,7 @@ function Navbar() {
             { id: "rules", label: "Guidelines" },
             { id: "events", label: "Gatherings" },
             { id: "wiki", label: "Guides" },
-            { id: "roster", label: "Guardians" },
+            { id: "roster", label: "Hierarchy" },
             { id: "join", label: "Join" },
           ].map((item) => (
             <a
@@ -276,7 +170,7 @@ function Hero() {
     <section className="pt-28 pb-12 text-center relative z-10 max-w-3xl mx-auto">
       <motion.div variants={stagger} initial="hidden" animate="visible">
         <motion.div variants={fadeUp} className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full bg-white border border-[#A6C49F] text-[#1C2E20] text-[11px] font-bold tracking-[0.18em] uppercase shadow-sm">
-          <span className="text-xs">✦</span> Garden Sanctuary & Guild
+          <span className="text-xs">✦</span> Sanctuary & Guild
         </motion.div>
 
         <motion.p
@@ -304,7 +198,7 @@ function Hero() {
           variants={fadeUp}
           className="text-sm md:text-base text-[#3A483C] max-w-lg mx-auto leading-relaxed font-medium mb-10"
         >
-          A lush botanical sanctuary built on kindness, clean progression, and genuine community. Step under the canopy and bloom with us.
+          A sanctuary built on kindness, clean progression, and genuine community. Step inside and belong with us.
         </motion.p>
 
         <motion.div variants={fadeUp} className="flex justify-center gap-4">
@@ -336,10 +230,10 @@ const announcementData = [
     summary: "Our journey into the new season begins this Friday! Join us in the voice lounge for pre-expedition tea and preparations.",
   },
   {
-    title: "Garden Reserves Replenished",
+    title: "Sanctuary Reserves Replenished",
     date: "July 15, 2026",
     tag: "Pantry & Vault",
-    summary: "Free raid flasks, elixirs, and food feasts have been restocked in the Grove Vault for all participating adventurers.",
+    summary: "Free raid flasks, elixirs, and food feasts have been restocked in the Vault for all participating adventurers.",
   },
 ];
 
@@ -477,7 +371,7 @@ function GuildRulesSection() {
 const eventData = [
   { title: "Main Expedition: Progression", time: "Fri · 8:00 PM EST", requirements: "ilvl 620+ · Consumables Provided" },
   { title: "Catch-up Raid & Dungeons", time: "Sat · 6:00 PM EST", requirements: "Open to All Guild Members" },
-  { title: "Cozy Garden Tea & Lounge", time: "Tue · 9:00 PM EST", requirements: "Casual · Open Voice Chat" },
+  { title: "Sanctuary Tea & Lounge", time: "Tue · 9:00 PM EST", requirements: "Casual · Open Voice Chat" },
 ];
 
 function EventsCalendar() {
@@ -508,7 +402,7 @@ function EventsCalendar() {
 
 const wikiTopics = [
   { title: "Alchemy & Elixirs Guide", desc: "Required pots, food feasts, and elemental blessings for raid night." },
-  { title: "Grove Bank Protocols", desc: "Sharing harvests, requesting gear, and contributing raw materials." },
+  { title: "Sanctuary Bank Protocols", desc: "Sharing harvests, requesting gear, and contributing raw materials." },
   { title: "Class Build Library", desc: "Member-crafted build guides for optimization without toxicity." },
 ];
 
@@ -540,10 +434,10 @@ function WikiSection() {
 
 /* ---------------- ROSTER ---------------- */
 
-const officers = [
-  { name: "EveLeader", role: "Grove Keeper", class: "Protector / Guardian" },
-  { name: "OfficerLex", role: "Raid Weaver", class: "Restoration / Healer" },
-  { name: "Tactician", role: "Elder", class: "Wild DPS / Theorycraft" },
+const hierarchy = [
+  { name: "lychee", role: "The Sovereign" },
+  { name: "juju", role: "Seraphim" },
+  { name: "xSumo", role: "Cherubim" },
 ];
 
 function Roster() {
@@ -551,22 +445,21 @@ function Roster() {
     <section className="py-6">
       <div className="flex items-center gap-3 mb-8">
         <FaShieldAlt className="text-[#1C2E20] text-base" />
-        <h2 className="text-2xl font-['Cinzel',serif] text-[#1C2E20] tracking-wider uppercase font-bold">Guardians</h2>
+        <h2 className="text-2xl font-['Cinzel',serif] text-[#1C2E20] tracking-wider uppercase font-bold">Divine Hierarchy</h2>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
-        {officers.map((o) => (
+        {hierarchy.map((h) => (
           <div
-            key={o.name}
+            key={h.name}
             className="p-6 rounded-2xl bg-white border border-[#A6C49F] flex items-center gap-4 shadow-sm"
           >
             <div className="w-11 h-11 rounded-full bg-[#E5EFE2] border border-[#A6C49F] flex items-center justify-center font-['Cinzel',serif] text-sm font-bold text-[#1C2E20]">
-              {o.name.charAt(0)}
+              {h.name.charAt(0)}
             </div>
             <div>
-              <h3 className="text-sm font-['Cinzel',serif] font-bold text-[#1C2E20] tracking-wide">{o.name}</h3>
-              <p className="text-[10px] tracking-wider uppercase text-[#2F4832] font-bold">{o.role}</p>
-              <p className="text-[11px] text-[#526354] font-medium">{o.class}</p>
+              <h3 className="text-sm font-['Cinzel',serif] font-bold text-[#1C2E20] tracking-wide">{h.name}</h3>
+              <p className="text-[10px] tracking-wider uppercase text-[#2F4832] font-bold">{h.role}</p>
             </div>
           </div>
         ))}
@@ -594,7 +487,7 @@ function JoinSection() {
           "We Welcome All"
         </p>
         <p className="text-[#3A483C] text-xs md:text-sm mb-8 max-w-md mx-auto leading-relaxed font-medium">
-          Whether you seek endgame progression or a tranquil community lounge under open branches, our sanctuary doors are always open.
+          Whether you seek endgame progression or a tranquil community lounge, our sanctuary doors are always open.
         </p>
         <div className="flex justify-center">
           <a
