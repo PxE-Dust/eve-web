@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { FaDiscord, FaBook, FaCalendarAlt, FaBullhorn, FaShieldAlt } from "react-icons/fa";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring, useVelocity } from "framer-motion";
 import type { Variants } from "framer-motion";
 
 /* ---------------- ANIMATION VARIANTS ---------------- */
@@ -40,7 +40,7 @@ function ScrollFocusSection({ children, id }: { children: ReactNode; id?: string
   );
 }
 
-/* ---------------- REACTIVE VINES & FALLING PETALS CANVAS ---------------- */
+/* ---------------- INTERACTIVE FALLING PETALS CANVAS (ORGANIC) ---------------- */
 
 interface Petal {
   id: number;
@@ -54,29 +54,10 @@ interface Petal {
   opacity: number;
 }
 
-interface VineNode {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  originalX: number;
-  originalY: number;
-}
-
-interface Vine {
-  startX: number;
-  length: number;
-  segments: VineNode[];
-  swayFreq: number;
-  swayAmp: number;
-}
-
-function NaturePhysicsCanvas() {
+function FallingPetalsCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const mouseRef = useRef({ x: -1000, y: -1000, vx: 0, vy: 0 });
   const lastMouseRef = useRef({ x: 0, y: 0, time: Date.now() });
-  const lastScrollYRef = useRef(0);
-  const scrollVelocityRef = useRef(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -88,45 +69,10 @@ function NaturePhysicsCanvas() {
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
-    // Initialize overlapping, physics-driven rope/spring vines
-    let vines: Vine[] = [];
-    const initVines = () => {
-      vines = [];
-      const numVines = Math.max(12, Math.floor(width / 110));
-      for (let i = 0; i <= numVines; i++) {
-        const startX = (width / numVines) * i + (Math.random() * 40 - 20);
-        const length = 180 + Math.random() * 220; // Original long draping style
-        const segmentCount = 14;
-        const segments: VineNode[] = [];
-
-        for (let j = 0; j < segmentCount; j++) {
-          const segY = (length / segmentCount) * j;
-          segments.push({
-            x: startX,
-            y: segY,
-            vx: 0,
-            vy: 0,
-            originalX: startX,
-            originalY: segY,
-          });
-        }
-
-        vines.push({
-          startX,
-          length,
-          segments,
-          swayFreq: 0.0015 + Math.random() * 0.001,
-          swayAmp: 12 + Math.random() * 18,
-        });
-      }
-    };
-    initVines();
-
     const handleResize = () => {
       if (!canvas) return;
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
-      initVines();
     };
     window.addEventListener("resize", handleResize);
 
@@ -141,126 +87,30 @@ function NaturePhysicsCanvas() {
     };
     window.addEventListener("mousemove", handleMouseMove);
 
-    const handleScroll = () => {
-      const currentScroll = window.scrollY;
-      const delta = currentScroll - lastScrollYRef.current;
-      // Impart satisfying vertical stretch and bounce on scroll
-      scrollVelocityRef.current = delta * 0.45;
-      lastScrollYRef.current = currentScroll;
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    // Initialize gentle falling petals
-    const count = Math.floor((width * height) / 22000);
+    // Organic Petals: Lower count, slower speed, less push
+    const count = Math.floor((width * height) / 45000);
     const petals: Petal[] = Array.from({ length: count }, (_, i) => ({
       id: i,
       x: Math.random() * width,
       y: Math.random() * height - height,
       size: Math.random() * 6 + 4,
-      speedY: Math.random() * 0.8 + 0.4,
+      speedY: Math.random() * 0.3 + 0.2, // Slower fall
       speedX: (Math.random() - 0.5) * 0.6,
       rotation: Math.random() * 360,
-      rotSpeed: (Math.random() - 0.5) * 1.5,
+      rotSpeed: (Math.random() - 0.5) * 0.4, // Slower spin
       opacity: Math.random() * 0.5 + 0.3,
     }));
 
-    let time = 0;
-
     const render = () => {
-      time += 1;
       ctx.clearRect(0, 0, width, height);
 
-      // Smoothly decay scroll momentum
-      scrollVelocityRef.current *= 0.88;
-      const scrollForce = scrollVelocityRef.current;
       const m = mouseRef.current;
 
-      // 1. Render & Update Physics Vines (Spring-mass + Scroll Bounce + Gentle Breeze)
-      ctx.save();
-      vines.forEach((v) => {
-        const segs = v.segments;
-
-        segs.forEach((seg, idx) => {
-          if (idx === 0) return; // Top anchor remains fixed
-
-          // Gentle horizontal breeze calculation
-          const breeze = Math.sin(time * v.swayFreq * 50 + idx * 0.3) * (v.swayAmp * (idx / segs.length));
-          const targetX = seg.originalX + breeze;
-          // Apply vertical scroll stretch proportional to how low the leaf hangs
-          const targetY = seg.originalY + scrollForce * (idx * 0.18);
-          
-          // Hooke's Law spring force
-          const dx = targetX - seg.x;
-          const dy = targetY - seg.y;
-          
-          seg.vx += dx * 0.09;
-          seg.vy += dy * 0.09;
-
-          // Mouse proximity push
-          const mdx = seg.x - m.x;
-          const mdy = seg.y - m.y;
-          const mdist = Math.sqrt(mdx * mdx + mdy * mdy);
-          if (mdist < 130 && mdist > 0) {
-            const push = (1 - mdist / 130);
-            seg.vx += (mdx / mdist) * push * 6 + m.vx * 2;
-            seg.vy += (mdy / mdist) * push * 4 + m.vy * 2;
-          }
-
-          // Damping friction
-          seg.vx *= 0.82;
-          seg.vy *= 0.82;
-
-          seg.x += seg.vx;
-          seg.y += seg.vy;
-        });
-
-        // Draw Vine Stem
-        ctx.strokeStyle = "#2F4832";
-        ctx.lineWidth = 2.6;
-        ctx.lineCap = "round";
-        ctx.beginPath();
-        ctx.moveTo(segs[0].x, segs[0].y);
-
-        for (let i = 1; i < segs.length - 1; i++) {
-          const xc = (segs[i].x + segs[i + 1].x) / 2;
-          const yc = (segs[i].y + segs[i + 1].y) / 2;
-          ctx.quadraticCurveTo(segs[i].x, segs[i].y, xc, yc);
-        }
-        ctx.stroke();
-
-        // Draw Overlapping Cute Organic Leaves along every segment
-        segs.forEach((seg, idx) => {
-          if (idx > 0 && idx % 2 === 0) {
-            ctx.save();
-            ctx.translate(seg.x, seg.y);
-            const angle = Math.atan2(seg.vy, seg.vx) + (idx % 4 === 0 ? 0.6 : -0.6);
-            ctx.rotate(angle);
-            
-            // Alternate lush leaf tones for depth
-            ctx.fillStyle = idx % 4 === 0 ? "#3A5A40" : "#4A704C";
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 12, 5.5, 0, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Draw delicate inner leaf vein
-            ctx.strokeStyle = "#2F4832";
-            ctx.lineWidth = 0.8;
-            ctx.beginPath();
-            ctx.moveTo(-8, 0);
-            ctx.lineTo(8, 0);
-            ctx.stroke();
-            
-            ctx.restore();
-          }
-        });
-      });
-      ctx.restore();
-
-      // 2. Render Falling Petals with Mouse Gravity & Wind
       petals.forEach((p) => {
         p.y += p.speedY;
         p.x += p.speedX + Math.sin(p.y * 0.01) * 0.4;
         p.rotation += p.rotSpeed;
+        p.rotSpeed *= 0.98; // Dampen the spin
 
         const dx = p.x - m.x;
         const dy = p.y - m.y;
@@ -269,8 +119,9 @@ function NaturePhysicsCanvas() {
 
         if (dist < maxDist && dist > 0) {
           const force = (1 - dist / maxDist);
-          p.x += (dx / dist) * force * 6 + m.vx * 4;
-          p.y += (dy / dist) * force * 4 + m.vy * 4;
+          // Reduced push force
+          p.x += (dx / dist) * force * 1.5 + m.vx * 1;
+          p.y += (dy / dist) * force * 1.0 + m.vy * 0.6;
         }
 
         if (p.y > height + 20) {
@@ -280,6 +131,7 @@ function NaturePhysicsCanvas() {
         if (p.x < -20) p.x = width + 20;
         if (p.x > width + 20) p.x = -20;
 
+        // Soft organic petal shape (ellipse)
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate((p.rotation * Math.PI) / 180);
@@ -293,6 +145,7 @@ function NaturePhysicsCanvas() {
         ctx.restore();
       });
 
+      // Dampen mouse velocity
       mouseRef.current.vx *= 0.9;
       mouseRef.current.vy *= 0.9;
 
@@ -304,7 +157,6 @@ function NaturePhysicsCanvas() {
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("scroll", handleScroll);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
@@ -314,6 +166,121 @@ function NaturePhysicsCanvas() {
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-30"
     />
+  );
+}
+
+/* ---------------- VINE CANOPY LOOP OVERLAY (ORGANIC & PHYSICS-BASED) ---------------- */
+
+function VineCanopyOverlay() {
+  const { scrollY } = useScroll();
+  const scrollVelocity = useVelocity(scrollY);
+
+  // Controlled sag factor: lower stiffness, higher damping for slow organic bounce
+  const springSag = useSpring(useTransform(scrollVelocity, [-2000, 2000], [0.1, 1.3]), { stiffness: 20, damping: 15 });
+
+  // Standard Heart/Ivy leaf shape path definition
+  const leafPath = "M0,15 A5,5 0 0,1 10,15 L0,25 A5,5 0 0,1 -10,15 Z";
+
+  // Anchor points at the top of the viewport
+  const anchors = [
+    { x: -50, y: 0 },
+    { x: 150, y: -20 },
+    { x: 300, y: 0 },
+    { x: 450, y: -20 },
+    { x: 600, y: 0 },
+    { x: 750, y: -20 },
+    { x: 900, y: 0 },
+  ];
+
+  // Sagging loop paths that span across the center column
+  const strands = [
+    { d: anchors[0].x + "," + anchors[0].y + " Q midX lowY " + anchors[2].x + "," + anchors[2].y, stagger: 0 },
+    { d: anchors[1].x + "," + anchors[1].y + " Q midX lowY " + anchors[3].x + "," + anchors[3].y, stagger: 100 },
+    { d: anchors[2].x + "," + anchors[2].y + " Q midX lowY " + anchors[4].x + "," + anchors[4].y, stagger: 200 },
+    { d: anchors[3].x + "," + anchors[3].y + " Q midX lowY " + anchors[5].x + "," + anchors[5].y, stagger: 300 },
+    { d: anchors[4].x + "," + anchors[4].y + " Q midX lowY " + anchors[6].x + "," + anchors[6].y, stagger: 400 },
+    { d: anchors[0].x + "," + anchors[0].y + " Q midX lowY " + anchors[1].x + "," + anchors[1].y, stagger: 50 },
+    { d: anchors[5].x + "," + anchors[5].y + " Q midX lowY " + anchors[6].x + "," + anchors[6].y, stagger: 350 },
+  ];
+
+  const midXOffset = useTransform(scrollY, [0, 800], [10, -10]);
+
+  const strandsWithPhysics = strands.map((strand) => {
+    const parts = strand.d.split(" ");
+    const A = parts[0].split(",");
+    const midQ = parts[1];
+    const midB = parts[2];
+    const B = parts[3].split(",");
+
+    const Ax = parseFloat(A[0]);
+    const Bx = parseFloat(B[0]);
+
+    // midX: Centered between anchors, with a slight drift drift drift on scroll
+    const midXCalc = (Ax + Bx) / 2 + midXOffset.get() + Math.random() * 20 - 10;
+    // lowY: Drifts lower (more sag) with scroll velocity, with an organic idle drape
+    const lowYBase = Ax > 100 && Ax < 800 ? 150 : 80;
+    const lowYCalc = lowYBase + springSag.get() * (Bx - Ax) * 0.15 + strand.stagger * 0.1;
+
+    // Point calculations along the curve to distribute foliage
+    const numFoliage = Math.max(10, Math.floor((Bx - Ax) / 25));
+    const foliage = [];
+    for (let t = 0; t <= 1; t += 1 / numFoliage) {
+      const u = 1 - t;
+      const x = u * u * Ax + 2 * u * t * midXCalc + t * t * Bx;
+      const y = u * u * parseFloat(A[1]) + 2 * u * t * lowYCalc + t * t * parseFloat(B[1]);
+      foliage.push({ x, y, rotate: Math.random() * 360 });
+    }
+
+    const midPath = "M" + strand.d.replace("midX lowY", midPathX(Ax, Bx) + " " + midPathY(Ax, Bx));
+
+    function midPathX(ax, bx) {
+      return (ax + bx) / 2 + midXOffset.get() + Math.random() * 10 - 5;
+    }
+    function midPathY(ax, bx) {
+      const lyBase = ax > 100 && ax < 800 ? 150 : 80;
+      return lyBase + springSag.get() * (bx - ax) * 0.1 + strand.stagger * 0.1;
+    }
+
+    return { ...strand, d: midPath, foliage };
+  });
+
+  return (
+    <div className="fixed inset-0 pointer-events-none z-40 overflow-hidden">
+      <svg className="absolute top-0 left-0 w-full h-screen text-[#1b3320] opacity-85" viewBox="0 0 1000 800" fill="none">
+        <defs>
+          <linearGradient id="canopyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#1C2E20" stopOpacity="1" />
+            <stop offset="40%" stopColor="#2F4832" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="# EFF4EC" stopOpacity="0" />
+          </linearGradient>
+          {/* Detailed Organic Leaf Shape */}
+          <g id="ivyLeaf">
+            <path d={leafPath} fill="currentColor" />
+          </g>
+        </defs>
+
+        {/* Dense Base Arch Fill */}
+        <path d="M-20,-10 L1020,-10 L1020,40 Q900,100 600,60 Q300,100 -20,40 Z" fill="url(#canopyGrad)" />
+
+        {/* Dynamic Loops Strands with Organic foliage Distribution */}
+        {strandsWithPhysics.map((strand, sIdx) => (
+          <g key={sIdx} className="text-[#1C2E20]" fill="#1C2E20">
+            {/* The sag path itself, uncontrolled sag factor, simple drape */}
+            <path d={strand.d} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            
+            {/* Stamp leaves along the curve: staggered stagger for natural feel */}
+            {strand.foliage.map((leaf, fIdx) => (
+              <use
+                key={fIdx}
+                href="#ivyLeaf"
+                transform={`translate(${leaf.x} ${leaf.y}) rotate(${leaf.rotate}) scale(${Math.random() * 0.5 + 0.8})`}
+                className="leaf"
+              />
+            ))}
+          </g>
+        ))}
+      </svg>
+    </div>
   );
 }
 
@@ -333,8 +300,9 @@ export default function App() {
 
   return (
     <div className="relative bg-[#EFF4EC] text-[#273229] min-h-screen antialiased overflow-x-hidden font-['Plus_Jakarta_Sans',sans-serif]">
-      <NaturePhysicsCanvas />
-
+      {/* Dynamic Vine Canopy Loops Overlay with low waggle sag factor */}
+      <VineCanopyOverlay />
+      
       <motion.div
         style={{ y: bgY }}
         className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(194,214,188,0.5),rgba(239,244,236,0.98))] z-0 pointer-events-none"
@@ -342,6 +310,7 @@ export default function App() {
 
       <Navbar />
 
+      {/* Layering content column higher than vines overlay */}
       <main className="relative z-10 max-w-4xl mx-auto px-6">
         <ScrollFocusSection>
           <Hero />
@@ -384,6 +353,9 @@ export default function App() {
         </ScrollFocusSection>
       </main>
 
+      {/* Floating Interactive petals column: lowercount, damping spin, organic feel */}
+      <FallingPetalsCanvas />
+
       <Footer />
     </div>
   );
@@ -425,7 +397,7 @@ function Navbar() {
             { id: "rules", label: "Guidelines" },
             { id: "events", label: "Gatherings" },
             { id: "wiki", label: "Guides" },
-            { id: "roster", label: "Council" },
+            { id: "roster", label: "The Council" },
             { id: "join", label: "Join" },
           ].map((item) => (
             <a
