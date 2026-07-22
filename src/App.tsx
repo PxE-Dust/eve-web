@@ -40,7 +40,7 @@ function ScrollFocusSection({ children, id }: { children: ReactNode; id?: string
   );
 }
 
-/* ---------------- INTERACTIVE FALLING PETALS / NATURE EFFECT ---------------- */
+/* ---------------- VINES & FALLING PETALS COMPONENT ---------------- */
 
 interface Petal {
   id: number;
@@ -54,7 +54,7 @@ interface Petal {
   opacity: number;
 }
 
-function FallingPetalsCanvas() {
+function VinesAndPetalsCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const mouseRef = useRef({ x: -1000, y: -1000, vx: 0, vy: 0 });
   const lastMouseRef = useRef({ x: 0, y: 0, time: Date.now() });
@@ -87,7 +87,7 @@ function FallingPetalsCanvas() {
     };
     window.addEventListener("mousemove", handleMouseMove);
 
-    // Initialize gentle falling elements (petals & pollen specs)
+    // Initialize falling petals
     const count = Math.floor((width * height) / 22000);
     const petals: Petal[] = Array.from({ length: count }, (_, i) => ({
       id: i,
@@ -101,18 +101,81 @@ function FallingPetalsCanvas() {
       opacity: Math.random() * 0.5 + 0.3,
     }));
 
+    // Helper to draw realistic hanging vines from the top corners and edges
+    const drawVines = () => {
+      ctx.save();
+      ctx.strokeStyle = "#2F4832";
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = "round";
+
+      // Define vine anchor points across the top
+      const anchors = [
+        { x: 0, length: 180, curve: 40 },
+        { x: width * 0.12, length: 240, curve: -30 },
+        { x: width * 0.28, length: 150, curve: 20 },
+        { x: width * 0.45, length: 210, curve: -25 },
+        { x: width * 0.65, length: 190, curve: 35 },
+        { x: width * 0.82, length: 260, curve: -40 },
+        { x: width, length: 200, curve: 30 },
+      ];
+
+      anchors.forEach((anchor, idx) => {
+        ctx.beginPath();
+        ctx.moveTo(anchor.x, 0);
+
+        // Create an organic swaying/hanging bezier curve for each vine
+        const cp1x = anchor.x + anchor.curve;
+        const cp1y = anchor.length * 0.4;
+        const cp2x = anchor.x - anchor.curve * 0.8;
+        const cp2y = anchor.length * 0.75;
+        const endX = anchor.x + (idx % 2 === 0 ? 15 : -15);
+        const endY = anchor.length;
+
+        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, endX, endY);
+        ctx.stroke();
+
+        // Draw leaves along the vine
+        const leafSteps = 6;
+        for (let s = 1; s <= leafSteps; s++) {
+          const t = s / leafSteps;
+          // Approximate point along bezier for leaf placement
+          const lx = (1 - t) * (1 - t) * (1 - t) * anchor.x +
+                     3 * (1 - t) * (1 - t) * t * cp1x +
+                     3 * (1 - t) * t * t * cp2x +
+                     t * t * t * endX;
+          const ly = (1 - t) * (1 - t) * (1 - t) * 0 +
+                     3 * (1 - t) * (1 - t) * t * cp1y +
+                     3 * (1 - t) * t * t * cp2y +
+                     t * t * t * endY;
+
+          ctx.save();
+          ctx.translate(lx, ly);
+          ctx.rotate((s % 2 === 0 ? 35 : -35) * (Math.PI / 180));
+          ctx.fillStyle = "#3A5A40";
+          ctx.beginPath();
+          ctx.ellipse(0, 0, 9, 4.5, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      });
+
+      ctx.restore();
+    };
+
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
+      // Render the original hanging vines first
+      drawVines();
+
       const m = mouseRef.current;
 
+      // Render interactive falling petals
       petals.forEach((p) => {
-        // Move down and drift
         p.y += p.speedY;
         p.x += p.speedX + Math.sin(p.y * 0.01) * 0.4;
         p.rotation += p.rotSpeed;
 
-        // Reactive mouse gravity / wind push
         const dx = p.x - m.x;
         const dy = p.y - m.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -120,12 +183,10 @@ function FallingPetalsCanvas() {
 
         if (dist < maxDist && dist > 0) {
           const force = (1 - dist / maxDist);
-          // Push away and impart mouse velocity vector
           p.x += (dx / dist) * force * 6 + m.vx * 4;
           p.y += (dy / dist) * force * 4 + m.vy * 4;
         }
 
-        // Recycle to top if out of bounds
         if (p.y > height + 20) {
           p.y = -20;
           p.x = Math.random() * width;
@@ -133,7 +194,6 @@ function FallingPetalsCanvas() {
         if (p.x < -20) p.x = width + 20;
         if (p.x > width + 20) p.x = -20;
 
-        // Draw soft organic petal shape
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate((p.rotation * Math.PI) / 180);
@@ -147,7 +207,6 @@ function FallingPetalsCanvas() {
         ctx.restore();
       });
 
-      // Decay mouse velocity when idle
       mouseRef.current.vx *= 0.9;
       mouseRef.current.vy *= 0.9;
 
@@ -187,8 +246,8 @@ export default function App() {
 
   return (
     <div className="relative bg-[#EFF4EC] text-[#273229] min-h-screen antialiased overflow-x-hidden font-['Plus_Jakarta_Sans',sans-serif]">
-      {/* Interactive physics-driven natural falling petals */}
-      <FallingPetalsCanvas />
+      {/* Original hanging vines + interactive falling petals */}
+      <VinesAndPetalsCanvas />
 
       <motion.div
         style={{ y: bgY }}
@@ -628,7 +687,7 @@ function JoinSection() {
             href="https://join.we-are-eve.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-3 px-8 py-3.5 rounded-2xl bg-1C2E20 text-[#EFF4EC] text-xs font-bold tracking-widest uppercase hover:bg-[#122015] transition shadow-md"
+            className="inline-flex items-center gap-3 px-8 py-3.5 rounded-2xl bg-[#1C2E20] text-[#EFF4EC] text-xs font-bold tracking-widest uppercase hover:bg-[#122015] transition shadow-md"
           >
             <FaDiscord className="text-base" /> Join Our Discord
           </a>
