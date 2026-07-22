@@ -1,88 +1,33 @@
 import { useEffect, useRef } from "react";
-import { FaDiscord, FaBook, FaCalendarAlt, FaBullhorn, FaShieldAlt, FaHeart } from "react-icons/fa";
+import { FaDiscord, FaBook, FaCalendarAlt, FaBullhorn, FaShieldAlt } from "react-icons/fa";
 import { motion, useScroll, useTransform } from "framer-motion";
 import type { Variants } from "framer-motion";
 
 /* ---------------- ANIMATION VARIANTS ---------------- */
 
 const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 22 },
+  hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
   },
 };
 
 const stagger: Variants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.14 } },
+  visible: { transition: { staggerChildren: 0.12 } },
 };
 
-/* ---------------- DRIFTING BUTTERFLIES & FIREFLIES ---------------- */
+/* ---------------- AMBIENT MIST & GLOW ---------------- */
 
-function AmbientNature() {
-  return (
-    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      {/* Drifting Golden Butterflies */}
-      {Array.from({ length: 6 }).map((_, i) => (
-        <motion.div
-          key={`butterfly-${i}`}
-          className="absolute text-amber-500/40 text-xl"
-          initial={{
-            x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1000),
-            y: Math.random() * (typeof window !== "undefined" ? window.innerHeight : 1000),
-          }}
-          animate={{
-            y: [-20, 20, -20],
-            x: [-30, 30, -30],
-            rotate: [-10, 15, -10],
-            scale: [0.9, 1.1, 0.9],
-          }}
-          transition={{
-            duration: 12 + i * 3,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        >
-          🦋
-        </motion.div>
-      ))}
-
-      {/* Floating Soft Glow Spores */}
-      {Array.from({ length: 14 }).map((_, i) => (
-        <motion.div
-          key={`spore-${i}`}
-          className="absolute w-2 h-2 rounded-full bg-amber-200/50 blur-[1px]"
-          initial={{
-            x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1000),
-            y: Math.random() * (typeof window !== "undefined" ? window.innerHeight : 1000),
-            opacity: 0.2,
-          }}
-          animate={{
-            y: [-40, 40, -40],
-            opacity: [0.2, 0.8, 0.2],
-          }}
-          transition={{
-            duration: 8 + i * 2,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-/* ---------------- CURSED / SUNLIGHT MOUSE GLOW ---------------- */
-
-function SunGlow() {
+function AmbientGlow() {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const move = (e: MouseEvent) => {
       if (!ref.current) return;
-      ref.current.style.transform = `translate(${e.clientX - 100}px, ${e.clientY - 100}px)`;
+      ref.current.style.transform = `translate(${e.clientX - 120}px, ${e.clientY - 120}px)`;
     };
     window.addEventListener("mousemove", move);
     return () => window.removeEventListener("mousemove", move);
@@ -91,8 +36,34 @@ function SunGlow() {
   return (
     <div
       ref={ref}
-      className="pointer-events-none fixed top-0 left-0 w-[200px] h-[200px] rounded-full bg-amber-100/30 blur-3xl z-0 transition-transform duration-100 ease-out"
+      className="pointer-events-none fixed top-0 left-0 w-[240px] h-[240px] rounded-full bg-[#E5EDE0]/40 blur-3xl z-0 transition-transform duration-150 ease-out"
     />
+  );
+}
+
+/* ---------------- HANGING WILLOW SVG ACCENTS ---------------- */
+
+function WillowBranches() {
+  return (
+    <div className="pointer-events-none absolute top-0 inset-x-0 h-48 z-10 overflow-hidden opacity-30">
+      {/* Left Hanging Vines */}
+      <svg className="absolute left-0 top-0 w-64 h-48 text-[#2F4832]" viewBox="0 0 200 150" fill="none" stroke="currentColor">
+        <path d="M 0 0 Q 30 60 50 120" strokeWidth="1" />
+        <path d="M 0 0 Q 60 40 110 90" strokeWidth="0.8" />
+        <path d="M 0 0 Q 15 80 20 140" strokeWidth="1" />
+        <circle cx="50" cy="120" r="2" fill="currentColor" />
+        <circle cx="110" cy="90" r="2" fill="currentColor" />
+        <circle cx="20" cy="140" r="2" fill="currentColor" />
+      </svg>
+      {/* Right Hanging Vines */}
+      <svg className="absolute right-0 top-0 w-64 h-48 text-[#2F4832] transform scale-x-[-1]" viewBox="0 0 200 150" fill="none" stroke="currentColor">
+        <path d="M 0 0 Q 30 60 50 120" strokeWidth="1" />
+        <path d="M 0 0 Q 60 40 110 90" strokeWidth="0.8" />
+        <path d="M 0 0 Q 15 80 20 140" strokeWidth="1" />
+        <circle cx="50" cy="120" r="2" fill="currentColor" />
+        <circle cx="110" cy="90" r="2" fill="currentColor" />
+      </svg>
+    </div>
   );
 }
 
@@ -100,26 +71,25 @@ function SunGlow() {
 
 export default function App() {
   const { scrollY } = useScroll();
-  const bgY = useTransform(scrollY, [0, 800], [0, -100]);
+  const bgY = useTransform(scrollY, [0, 800], [0, -60]);
 
   useEffect(() => {
-    // Inject custom elegant fonts dynamically
     const link = document.createElement("link");
     link.href =
-      "https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap";
+      "https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500&display=swap";
     link.rel = "stylesheet";
     document.head.appendChild(link);
   }, []);
 
   return (
-    <div className="relative bg-[#f7f6f0] text-stone-800 min-h-screen antialiased overflow-hidden font-['Plus_Jakarta_Sans',sans-serif]">
-      <AmbientNature />
-      <SunGlow />
+    <div className="relative bg-[#FDFBF7] text-[#2C352E] min-h-screen antialiased overflow-hidden font-['Plus_Jakarta_Sans',sans-serif]">
+      <AmbientGlow />
+      <WillowBranches />
 
-      {/* Sunbeam Light Gradient */}
+      {/* Subtle Mist Radial */}
       <motion.div
         style={{ y: bgY }}
-        className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_10%,rgba(163,193,150,0.25),transparent_60%)] z-0 pointer-events-none"
+        className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(216,228,212,0.35),transparent_70%)] z-0 pointer-events-none"
       />
 
       <Navbar />
@@ -141,14 +111,17 @@ export default function App() {
   );
 }
 
-/* ---------------- FLORAL DIVIDER ---------------- */
+/* ---------------- BOTANICAL DIVIDER ---------------- */
 
 function FloralDivider() {
   return (
-    <div className="flex items-center justify-center gap-4 my-16 opacity-60">
-      <div className="h-px bg-gradient-to-r from-transparent via-[#2F4832]/30 to-transparent w-32 md:w-48" />
-      <span className="text-amber-600 text-sm">🌸</span>
-      <div className="h-px bg-gradient-to-r from-transparent via-[#2F4832]/30 to-transparent w-32 md:w-48" />
+    <div className="flex items-center justify-center gap-3 my-20 opacity-70">
+      <div className="h-px bg-gradient-to-r from-transparent via-[#2F4832]/20 to-transparent w-28 md:w-44" />
+      <svg className="w-5 h-5 text-[#2F4832]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+        <path d="M12 2C12 2 14.5 8 19 9C14.5 10 12 16 12 16C12 16 9.5 10 5 9C9.5 8 12 2 12 2Z" />
+        <path d="M12 16V22" />
+      </svg>
+      <div className="h-px bg-gradient-to-r from-transparent via-[#2F4832]/20 to-transparent w-28 md:w-44" />
     </div>
   );
 }
@@ -157,33 +130,30 @@ function FloralDivider() {
 
 function Navbar() {
   return (
-    <nav className="fixed top-0 w-full z-50 bg-[#f7f6f0]/85 border-b border-[#2F4832]/10 backdrop-blur-md">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#9AB88A]/20 border border-[#9AB88A] flex items-center justify-center text-[#2F4832]">
-            <span className="text-lg">🦋</span>
-          </div>
-          <div>
-            <span className="font-['Playfair_Display',serif] tracking-wider text-[#2F4832] font-semibold text-xl uppercase block leading-none">
-              Eve
-            </span>
-            <span className="text-[10px] tracking-widest text-stone-500 uppercase font-medium">Est. 2026</span>
-          </div>
+    <nav className="fixed top-0 w-full z-50 bg-[#FDFBF7]/90 border-b border-[#2F4832]/10 backdrop-blur-md">
+      <div className="max-w-6xl mx-auto px-8 py-4 flex justify-between items-center">
+        <div className="flex items-center gap-4">
+          <span className="font-['Cinzel',serif] tracking-[0.25em] text-[#2F4832] font-semibold text-xl uppercase">
+            Eve
+          </span>
+          <span className="text-[10px] tracking-[0.2em] text-[#2F4832]/60 uppercase border-l border-[#2F4832]/20 pl-4 py-0.5">
+            Est. 2026
+          </span>
         </div>
 
-        <div className="hidden md:flex space-x-7 text-sm text-stone-600 font-medium">
+        <div className="hidden md:flex space-x-8 text-xs tracking-widest text-[#2C352E]/70 font-medium uppercase">
           {[
-            { id: "rules", label: "Rules" },
-            { id: "announcements", label: "Announcements" },
+            { id: "rules", label: "Guidelines" },
+            { id: "announcements", label: "News" },
             { id: "events", label: "Gatherings" },
             { id: "wiki", label: "Guides" },
             { id: "roster", label: "Guardians" },
-            { id: "join", label: "Join Us" },
+            { id: "join", label: "Join" },
           ].map((item) => (
             <a
               key={item.id}
               href={`#${item.id}`}
-              className="hover:text-[#2F4832] transition hover:underline underline-offset-8 decoration-amber-400"
+              className="hover:text-[#2F4832] transition hover:underline underline-offset-8 decoration-[#8FA885]"
             >
               {item.label}
             </a>
@@ -198,53 +168,55 @@ function Navbar() {
 
 function Hero() {
   return (
-    <section className="pt-40 pb-16 text-center relative z-10 max-w-4xl mx-auto px-6">
+    <section className="pt-44 pb-16 text-center relative z-10 max-w-4xl mx-auto px-6">
       <motion.div variants={stagger} initial="hidden" animate="visible">
-        {/* Arch Branding Card Preview */}
-        <motion.div variants={fadeUp} className="mx-auto mb-8 w-48 h-64 rounded-t-full bg-[#9AB88A]/30 border-2 border-[#9AB88A]/60 flex flex-col items-center justify-center p-6 shadow-sm relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-white/40 to-transparent pointer-events-none" />
-          <span className="text-3xl mb-1">🦋</span>
-          <h1 className="font-['Caveat',cursive] text-5xl text-[#2F4832] font-bold leading-tight">Eve</h1>
-          <p className="text-[11px] uppercase tracking-widest text-stone-600 font-semibold mt-1">Est. 2026</p>
+        {/* Top Framing Pill */}
+        <motion.div variants={fadeUp} className="inline-flex items-center gap-2 mb-6 px-4 py-1 rounded-full bg-[#E8EFE5] border border-[#C5D8C0] text-[#2F4832] text-[11px] font-medium tracking-[0.2em] uppercase">
+          Garden Sanctuary & Guild
         </motion.div>
 
-        <motion.div variants={fadeUp} className="inline-flex items-center gap-2 mb-3 px-4 py-1.5 rounded-full bg-[#9AB88A]/20 border border-[#9AB88A]/40 text-[#2F4832] text-xs font-semibold tracking-wider uppercase">
-          <span className="text-amber-500">✨</span> Sanctuary & Community
-        </motion.div>
-
-        <motion.h2
+        {/* Script Accent Subtitle */}
+        <motion.p
           variants={fadeUp}
-          className="text-4xl md:text-6xl font-['Playfair_Display',serif] font-normal mb-3 text-[#2F4832] tracking-tight"
+          className="font-['Alex_Brush',cursive] text-4xl md:text-5xl text-[#2F4832] mb-1"
         >
-          Welcome to <span className="italic font-normal">Eve</span>
-        </motion.h2>
+          Enjoy Your Time at
+        </motion.p>
+
+        {/* High Elegance Main Header */}
+        <motion.h1
+          variants={fadeUp}
+          className="text-6xl md:text-8xl font-['Cinzel',serif] font-normal tracking-[0.15em] text-[#2F4832] uppercase mb-6"
+        >
+          Eve
+        </motion.h1>
 
         <motion.p
           variants={fadeUp}
-          className="font-['Caveat',cursive] text-4xl text-amber-700 font-bold mb-6"
+          className="font-['Cormorant_Garamond',serif] italic text-2xl md:text-3xl text-[#526354] max-w-xl mx-auto mb-8 font-light"
         >
           "We Welcome All"
         </motion.p>
 
         <motion.p
           variants={fadeUp}
-          className="text-base md:text-lg text-stone-600 max-w-xl mx-auto leading-relaxed font-light mb-8"
+          className="text-sm md:text-base text-stone-600 max-w-lg mx-auto leading-relaxed font-light mb-10"
         >
-          A botanical haven built on kindness, progression, and genuine friendship. Step under the canopy and grow with us.
+          A peaceful, garden-inspired community blooming in the wild. We cultivate clean progression, calm coordination, and genuine warmth under open skies.
         </motion.p>
 
-        <motion.div variants={fadeUp} className="flex justify-center gap-4">
+        <motion.div variants={fadeUp} className="flex justify-center gap-5">
           <a
             href="#join"
-            className="px-7 py-3 rounded-2xl bg-[#2F4832] text-[#f7f6f0] font-medium hover:bg-[#233826] transition shadow-md hover:shadow-lg"
+            className="px-8 py-3.5 rounded-full bg-[#2F4832] text-[#FDFBF7] text-xs font-medium tracking-widest uppercase hover:bg-[#223625] transition shadow-sm"
           >
             Apply to Guild
           </a>
           <a
-            href="#rules"
-            className="px-7 py-3 rounded-2xl bg-white border border-stone-200 text-stone-700 font-medium hover:border-[#9AB88A] transition shadow-sm"
+            href="#events"
+            className="px-8 py-3.5 rounded-full bg-white border border-[#2F4832]/20 text-[#2C352E] text-xs font-medium tracking-widest uppercase hover:border-[#2F4832] transition shadow-sm"
           >
-            Read Guidelines
+            View Schedule
           </a>
         </motion.div>
       </motion.div>
@@ -252,38 +224,51 @@ function Hero() {
   );
 }
 
-/* ---------------- GUILD RULES (Chalkboard / Botanical Card Theme) ---------------- */
+/* ---------------- GUIDELINES (Garden / Frame Design) ---------------- */
 
 function GuildRulesSection() {
   const rules = [
-    { title: "Inclusivity First", desc: "We are a safe, welcoming sanctuary for players of all backgrounds, experience levels, and playstyles." },
-    { title: "Kindness & Calm", desc: "Constructive feedback over toxicity. We clear content together with patience and good spirits." },
-    { title: "Community Support", desc: "Share resources, assist sprouts, and pass along gear or alchemy from the Grove Bank freely." },
+    { title: "Warmth & Inclusivity", desc: "We are a safe, welcoming space for players of all paths, backgrounds, and playstyles." },
+    { title: "Patience & Calm", desc: "Constructive feedback over toxicity. We clear challenging content together with patience and good cheer." },
+    { title: "Shared Harvests", desc: "Pass along potions, feasts, and knowledge from the Grove Bank to support fellow members freely." },
   ];
 
   return (
     <section id="rules" className="max-w-4xl mx-auto px-6 py-8">
-      <motion.div variants={fadeUp} initial="hidden" whileInView="visible" className="text-center mb-10">
-        <h2 className="text-3xl md:text-4xl font-['Playfair_Display',serif] text-[#2F4832] mb-2">Guild Guidelines</h2>
-        <p className="font-['Caveat',cursive] text-2xl text-stone-500">To ensure the fun and safety of the guild</p>
+      <motion.div variants={fadeUp} initial="hidden" whileInView="visible" className="text-center mb-12">
+        <span className="text-[10px] tracking-[0.25em] text-[#2F4832]/70 uppercase font-semibold block mb-2">
+          Sanctuary Covenant
+        </span>
+        <h2 className="text-3xl md:text-4xl font-['Cinzel',serif] text-[#2F4832] tracking-wider uppercase">
+          Guild Guidelines
+        </h2>
       </motion.div>
 
-      {/* Chalkboard Styled Container matching your image */}
+      {/* Elegant Line Framed Card */}
       <motion.div
         variants={fadeUp}
         initial="hidden"
         whileInView="visible"
-        className="p-8 md:p-12 rounded-3xl bg-[#232725] text-stone-100 border-4 border-[#333a36] shadow-2xl relative overflow-hidden"
+        className="p-8 md:p-12 rounded-2xl bg-white/80 border border-[#2F4832]/20 shadow-sm relative"
       >
-        <div className="absolute top-4 right-4 text-3xl opacity-20">🌿</div>
-        <div className="absolute bottom-4 left-4 text-3xl opacity-20">🪴</div>
+        {/* Subtle Frame Corner Markers */}
+        <div className="absolute top-3 left-3 text-[#2F4832]/30 text-xs">┼</div>
+        <div className="absolute top-3 right-3 text-[#2F4832]/30 text-xs">┼</div>
+        <div className="absolute bottom-3 left-3 text-[#2F4832]/30 text-xs">┼</div>
+        <div className="absolute bottom-3 right-3 text-[#2F4832]/30 text-xs">┼</div>
 
-        <div className="grid md:grid-cols-3 gap-6 relative z-10">
+        <div className="grid md:grid-cols-3 gap-8">
           {rules.map((r, idx) => (
-            <div key={idx} className="p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
-              <span className="font-['Caveat',cursive] text-2xl text-amber-300 block mb-1">0{idx + 1}.</span>
-              <h3 className="font-['Playfair_Display',serif] text-lg text-emerald-200 mb-2">{r.title}</h3>
-              <p className="text-xs text-stone-300 leading-relaxed font-light">{r.desc}</p>
+            <div key={idx} className="flex flex-col">
+              <span className="font-['Cinzel',serif] text-xs tracking-widest text-[#8FA885] mb-2">
+                0{idx + 1}
+              </span>
+              <h3 className="font-['Cinzel',serif] text-base text-[#2F4832] mb-2 tracking-wide">
+                {r.title}
+              </h3>
+              <p className="text-xs text-stone-600 leading-relaxed font-light">
+                {r.desc}
+              </p>
             </div>
           ))}
         </div>
@@ -299,13 +284,13 @@ const announcementData = [
     title: "Summer Solstice Gathering & Raid Launch",
     date: "July 20, 2026",
     tag: "Guild Event",
-    summary: "Our journey into the new season begins this Friday! Prepare your gear and join us in voice chat for pre-raid rituals.",
+    summary: "Our journey into the new season begins this Friday! Join us in the voice sanctuary for pre-expedition preparations.",
   },
   {
-    title: "Botanist Reserves Replenished",
+    title: "Garden Reserves Replenished",
     date: "July 15, 2026",
-    tag: "Pantry & Stock",
-    summary: "Free raid flasks, potions, and food feasts are ready in the Grove Vault for all members participating in progression.",
+    tag: "Pantry & Vault",
+    summary: "Free raid flasks, elixirs, and food feasts have been restocked in the Grove Vault for all participating adventurers.",
   },
 ];
 
@@ -313,8 +298,8 @@ function Announcements() {
   return (
     <section id="announcements" className="max-w-5xl mx-auto px-6 py-8">
       <motion.div variants={fadeUp} initial="hidden" whileInView="visible" className="flex items-center gap-3 mb-8">
-        <FaBullhorn className="text-[#2F4832] text-xl" />
-        <h2 className="text-3xl font-['Playfair_Display',serif] text-[#2F4832]">Grove Announcements</h2>
+        <FaBullhorn className="text-[#2F4832] text-sm" />
+        <h2 className="text-2xl font-['Cinzel',serif] text-[#2F4832] tracking-wider uppercase">Announcements</h2>
       </motion.div>
 
       <div className="grid md:grid-cols-2 gap-6">
@@ -324,16 +309,16 @@ function Announcements() {
             variants={fadeUp}
             initial="hidden"
             whileInView="visible"
-            className="p-7 rounded-2xl bg-white/80 border border-[#2F4832]/10 shadow-sm hover:border-[#9AB88A] transition"
+            className="p-8 rounded-xl bg-white/70 border border-[#2F4832]/15 shadow-sm hover:border-[#2F4832]/40 transition"
           >
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-xs px-3 py-1 rounded-full bg-[#9AB88A]/20 text-[#2F4832] font-semibold">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-[10px] tracking-widest px-3 py-1 rounded-full bg-[#E8EFE5] text-[#2F4832] font-semibold uppercase">
                 {item.tag}
               </span>
-              <span className="text-xs text-stone-400">{item.date}</span>
+              <span className="text-xs text-stone-400 font-light">{item.date}</span>
             </div>
-            <h3 className="text-xl font-['Playfair_Display',serif] mb-2 text-stone-800">{item.title}</h3>
-            <p className="text-stone-600 text-sm leading-relaxed">{item.summary}</p>
+            <h3 className="text-lg font-['Cinzel',serif] mb-2 text-[#2F4832] tracking-wide">{item.title}</h3>
+            <p className="text-stone-600 text-xs leading-relaxed font-light">{item.summary}</p>
           </motion.div>
         ))}
       </div>
@@ -345,16 +330,16 @@ function Announcements() {
 
 const eventData = [
   { title: "Main Expedition: Progression", time: "Fri · 8:00 PM EST", requirements: "ilvl 620+ · Consumables Provided" },
-  { title: "Sprout & Catch-up Raid", time: "Sat · 6:00 PM EST", requirements: "Open to All Guild Members" },
-  { title: "Cozy Dungeon & Coffee Night", time: "Tue · 9:00 PM EST", requirements: "Casual · Open Voice Lounge" },
+  { title: "Catch-up Raid & Dungeons", time: "Sat · 6:00 PM EST", requirements: "Open to All Guild Members" },
+  { title: "Cozy Garden Tea & Lounge", time: "Tue · 9:00 PM EST", requirements: "Casual · Open Voice Chat" },
 ];
 
 function EventsCalendar() {
   return (
     <section id="events" className="max-w-5xl mx-auto px-6 py-8">
       <motion.div variants={fadeUp} initial="hidden" whileInView="visible" className="flex items-center gap-3 mb-8">
-        <FaCalendarAlt className="text-[#2F4832] text-xl" />
-        <h2 className="text-3xl font-['Playfair_Display',serif] text-[#2F4832]">Upcoming Gatherings</h2>
+        <FaCalendarAlt className="text-[#2F4832] text-sm" />
+        <h2 className="text-2xl font-['Cinzel',serif] text-[#2F4832] tracking-wider uppercase">Gatherings</h2>
       </motion.div>
 
       <div className="grid md:grid-cols-3 gap-6">
@@ -364,12 +349,12 @@ function EventsCalendar() {
             variants={fadeUp}
             initial="hidden"
             whileInView="visible"
-            whileHover={{ y: -4 }}
-            className="p-6 rounded-2xl bg-white/80 border border-[#2F4832]/10 shadow-sm hover:border-amber-400 transition"
+            whileHover={{ y: -3 }}
+            className="p-6 rounded-xl bg-white/70 border border-[#2F4832]/15 shadow-sm hover:border-[#2F4832]/40 transition"
           >
-            <span className="text-xs font-semibold text-amber-700 block mb-1 uppercase tracking-wider">{e.time}</span>
-            <h3 className="text-lg font-['Playfair_Display',serif] mb-2 text-stone-800">{e.title}</h3>
-            <p className="text-xs text-stone-500 border-t border-stone-100 pt-3 mt-3">{e.requirements}</p>
+            <span className="text-[10px] tracking-widest font-semibold text-[#526354] block mb-2 uppercase">{e.time}</span>
+            <h3 className="text-base font-['Cinzel',serif] mb-2 text-[#2F4832]">{e.title}</h3>
+            <p className="text-xs text-stone-500 border-t border-stone-100 pt-3 mt-3 font-light">{e.requirements}</p>
           </motion.div>
         ))}
       </div>
@@ -380,17 +365,17 @@ function EventsCalendar() {
 /* ---------------- WIKI ---------------- */
 
 const wikiTopics = [
-  { title: "Herbalism & Alchemy Vault", desc: "Required pots, food feasts, and elemental blessings for raid night." },
+  { title: "Alchemy & Elixirs Guide", desc: "Required pots, food feasts, and elemental blessings for raid night." },
   { title: "Grove Bank Protocols", desc: "Sharing harvests, requesting gear, and contributing raw materials." },
-  { title: "Class Build Guides", desc: "Member-crafted build guides for optimization without toxicity." },
+  { title: "Class Build Library", desc: "Member-crafted build guides for optimization without toxicity." },
 ];
 
 function WikiSection() {
   return (
     <section id="wiki" className="max-w-5xl mx-auto px-6 py-8">
       <motion.div variants={fadeUp} initial="hidden" whileInView="visible" className="flex items-center gap-3 mb-8">
-        <FaBook className="text-[#2F4832] text-xl" />
-        <h2 className="text-3xl font-['Playfair_Display',serif] text-[#2F4832]">Field Guides & Lore</h2>
+        <FaBook className="text-[#2F4832] text-sm" />
+        <h2 className="text-2xl font-['Cinzel',serif] text-[#2F4832] tracking-wider uppercase">Field Guides</h2>
       </motion.div>
 
       <div className="grid md:grid-cols-3 gap-6">
@@ -400,11 +385,11 @@ function WikiSection() {
             variants={fadeUp}
             initial="hidden"
             whileInView="visible"
-            className="p-6 rounded-2xl bg-white/60 border border-stone-200 hover:bg-white transition"
+            className="p-6 rounded-xl bg-white/50 border border-[#2F4832]/10 hover:bg-white transition"
           >
-            <h3 className="text-lg font-['Playfair_Display',serif] mb-2 text-stone-800">{w.title}</h3>
-            <p className="text-sm text-stone-600 mb-4 leading-relaxed">{w.desc}</p>
-            <a href="#" className="text-xs text-[#2F4832] font-semibold hover:underline flex items-center gap-1">
+            <h3 className="text-base font-['Cinzel',serif] mb-2 text-[#2F4832]">{w.title}</h3>
+            <p className="text-xs text-stone-600 mb-4 leading-relaxed font-light">{w.desc}</p>
+            <a href="#" className="text-[11px] text-[#2F4832] tracking-widest font-semibold uppercase hover:underline flex items-center gap-1">
               Read Guide →
             </a>
           </motion.div>
@@ -426,8 +411,8 @@ function Roster() {
   return (
     <section id="roster" className="max-w-5xl mx-auto px-6 py-8">
       <motion.div variants={fadeUp} initial="hidden" whileInView="visible" className="flex items-center gap-3 mb-8">
-        <FaShieldAlt className="text-[#2F4832] text-xl" />
-        <h2 className="text-3xl font-['Playfair_Display',serif] text-[#2F4832]">Grove Guardians</h2>
+        <FaShieldAlt className="text-[#2F4832] text-sm" />
+        <h2 className="text-2xl font-['Cinzel',serif] text-[#2F4832] tracking-wider uppercase">Guardians</h2>
       </motion.div>
 
       <div className="grid md:grid-cols-3 gap-6">
@@ -437,15 +422,15 @@ function Roster() {
             variants={fadeUp}
             initial="hidden"
             whileInView="visible"
-            className="p-6 rounded-2xl bg-white/80 border border-[#2F4832]/10 flex items-center gap-4 shadow-sm"
+            className="p-6 rounded-xl bg-white/70 border border-[#2F4832]/15 flex items-center gap-4 shadow-sm"
           >
-            <div className="w-12 h-12 rounded-full bg-[#9AB88A]/30 border border-[#9AB88A] flex items-center justify-center font-bold text-[#2F4832]">
+            <div className="w-10 h-10 rounded-full bg-[#E8EFE5] border border-[#C5D8C0] flex items-center justify-center font-['Cinzel',serif] text-sm font-semibold text-[#2F4832]">
               {o.name.charAt(0)}
             </div>
             <div>
-              <h3 className="text-lg font-medium text-stone-800">{o.name}</h3>
-              <p className="text-xs text-amber-700 font-semibold">{o.role}</p>
-              <p className="text-xs text-stone-400">{o.class}</p>
+              <h3 className="text-sm font-['Cinzel',serif] text-[#2F4832] tracking-wide">{o.name}</h3>
+              <p className="text-[10px] tracking-wider uppercase text-[#526354] font-medium">{o.role}</p>
+              <p className="text-[11px] text-stone-400 font-light">{o.class}</p>
             </div>
           </motion.div>
         ))}
@@ -463,24 +448,28 @@ function JoinSection() {
         variants={fadeUp}
         initial="hidden"
         whileInView="visible"
-        className="p-10 md:p-14 rounded-3xl bg-gradient-to-b from-[#9AB88A]/20 to-[#f7f6f0] border border-[#9AB88A]/40 shadow-sm relative overflow-hidden"
+        className="p-10 md:p-14 rounded-2xl bg-white/80 border border-[#2F4832]/20 shadow-sm relative"
       >
-        <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 text-xl">
-          <FaHeart />
-        </div>
-        <h2 className="text-3xl md:text-4xl font-['Playfair_Display',serif] text-[#2F4832] mb-2">Find Your Place in Eve</h2>
-        <p className="font-['Caveat',cursive] text-3xl text-amber-700 mb-6">"We Welcome All"</p>
-        <p className="text-stone-600 text-sm mb-8 max-w-md mx-auto leading-relaxed font-light">
-          Whether you're pushing high-tier raid content or looking for a relaxing community lounge under the trees, our doors are open.
+        <span className="font-['Alex_Brush',cursive] text-4xl text-[#2F4832] block mb-1">
+          Welcome Home
+        </span>
+        <h2 className="text-3xl md:text-4xl font-['Cinzel',serif] text-[#2F4832] tracking-wider uppercase mb-3">
+          Find Your Place in Eve
+        </h2>
+        <p className="font-['Cormorant_Garamond',serif] italic text-xl text-[#526354] mb-6 font-light">
+          "We Welcome All"
         </p>
-        <div className="flex justify-center gap-4">
+        <p className="text-stone-600 text-xs md:text-sm mb-8 max-w-md mx-auto leading-relaxed font-light">
+          Whether you seek endgame progression or a tranquil community lounge under open branches, our sanctuary doors are always open.
+        </p>
+        <div className="flex justify-center">
           <a
             href="https://discord.gg"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-[#2F4832] text-[#f7f6f0] font-medium hover:bg-[#233826] transition shadow-md"
+            className="inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-[#2F4832] text-[#FDFBF7] text-xs font-medium tracking-widest uppercase hover:bg-[#223625] transition shadow-md"
           >
-            <FaDiscord className="text-lg" /> Join Our Discord
+            <FaDiscord className="text-base" /> Join Our Discord
           </a>
         </div>
       </motion.div>
@@ -492,8 +481,8 @@ function JoinSection() {
 
 function Footer() {
   return (
-    <footer className="text-center py-8 text-stone-400 text-sm">
-      © {new Date().getFullYear()} Eve Guild · EST. 2026 · Planted with Care 🌱
+    <footer className="text-center py-10 text-stone-400 text-xs font-light tracking-widest uppercase">
+      © {new Date().getFullYear()} Eve Guild · Est. 2026 · Planted with Care
     </footer>
   );
 }
