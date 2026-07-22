@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { FaDiscord, FaBook, FaCalendarAlt, FaBullhorn, FaShieldAlt } from "react-icons/fa";
-import { motion, useScroll, useVelocity, useTransform, useSpring } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import type { Variants } from "framer-motion";
 
 /* ---------------- ANIMATION VARIANTS ---------------- */
@@ -40,201 +40,97 @@ function ScrollFocusSection({ children, id }: { children: ReactNode; id?: string
   );
 }
 
-/* ---------------- REALISTIC BOTANICAL SVG ELEMENTS ---------------- */
+/* ---------------- VINE ARCH OVERLAY (FRAME STYLE) ---------------- */
 
-// Detailed Leaf with Stem & Vein Detail
-interface DetailedLeafProps {
-  x: number;
-  y: number;
-  scale?: number;
-  rotate?: number;
-  fill?: string;
-  delay?: number;
-}
-
-function DetailedLeaf({ x, y, scale = 1, rotate = 0, fill = "#1B3022", delay = 0 }: DetailedLeafProps) {
+function VineArchOverlay() {
   return (
-    <motion.g
-      transform={`translate(${x}, ${y}) scale(${scale}) rotate(${rotate})`}
-      animate={{ rotate: [rotate - 4, rotate + 4, rotate - 4] }}
-      transition={{ duration: 4 + delay, repeat: Infinity, ease: "easeInOut", delay }}
-    >
-      {/* Leaf Shadow/Depth Layer */}
-      <path
-        d="M 0 0 C -12 -18, -16 -36, 0 -52 C 16 -36, 12 -18, 0 0 Z"
-        fill={fill}
-      />
-      {/* Inner Leaf Highlights & Veins */}
-      <path d="M 0 0 L 0 -46" stroke="#527055" strokeWidth="1.2" strokeLinecap="round" opacity="0.6" />
-      <path d="M 0 -12 Q -6 -18 -10 -20" stroke="#527055" strokeWidth="0.8" opacity="0.5" />
-      <path d="M 0 -12 Q 6 -18 10 -20" stroke="#527055" strokeWidth="0.8" opacity="0.5" />
-      <path d="M 0 -26 Q -5 -30 -8 -32" stroke="#527055" strokeWidth="0.8" opacity="0.5" />
-      <path d="M 0 -26 Q 5 -30 8 -32" stroke="#527055" strokeWidth="0.8" opacity="0.5" />
-    </motion.g>
-  );
-}
-
-// Rendered Flower Bud Accent
-function FlowerBud({ x, y, scale = 1, rotate = 0 }: { x: number; y: number; scale?: number; rotate?: number }) {
-  return (
-    <g transform={`translate(${x}, ${y}) scale(${scale}) rotate(${rotate})`}>
-      {/* Sepal base */}
-      <path d="M -4 4 C -6 -2, -2 -8, 0 -12 C 2 -8, 6 -2, 4 4 Z" fill="#2E4832" />
-      {/* Soft Petals */}
-      <path d="M -5 -4 C -10 -12, -4 -20, 0 -22 C 4 -20, 10 -12, 5 -4 Z" fill="#E8D2C4" />
-      <path d="M -3 -4 C -6 -10, -1 -16, 0 -18 C 1 -16, 6 -10, 3 -4 Z" fill="#F7EBE1" />
-    </g>
-  );
-}
-
-/* ---------------- LUSH DRAPING GREENERY & CANOPY ---------------- */
-
-function LushHangingVines() {
-  const { scrollY } = useScroll();
-  const scrollVelocity = useVelocity(scrollY);
-
-  const rawScrollAngleLeft = useTransform(scrollVelocity, [-2000, 2000], [10, -10]);
-  const rawScrollAngleRight = useTransform(scrollVelocity, [-2000, 2000], [-10, 10]);
-
-  const springLeft = useSpring(rawScrollAngleLeft, { stiffness: 20, damping: 10, mass: 1 });
-  const springRight = useSpring(rawScrollAngleRight, { stiffness: 20, damping: 10, mass: 1 });
-
-  return (
-    <div className="pointer-events-none absolute top-full inset-x-0 h-[880px] z-10 overflow-visible">
-      {/* ---------------- HEAVY TOP HEADER CANOPY ---------------- */}
-      <div className="absolute top-0 inset-x-0 h-[120px] pointer-events-none z-20 overflow-hidden">
-        <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 1200 120">
-          {/* Layered Leaf Clusters across header beam */}
-          {Array.from({ length: 32 }).map((_, i) => {
-            const x = i * 40 - 15;
-            const y = 10 + (i % 4) * 10;
-            const scale = 0.85 + (i % 3) * 0.2;
-            const rot = (i % 2 === 0 ? 1 : -1) * (15 + (i % 5) * 12);
-            return (
-              <g key={`top-leaf-${i}`}>
-                <DetailedLeaf x={x} y={y + 35} scale={scale} rotate={rot} fill={i % 2 === 0 ? "#1B3022" : "#28422C"} />
-                {i % 4 === 0 && <FlowerBud x={x + 10} y={y + 25} scale={0.7} rotate={rot} />}
-              </g>
-            );
-          })}
-        </svg>
-      </div>
-
-      {/* ================= FAR LEFT HEAVY VINE DRAPE ================= */}
-      <motion.div
-        style={{ rotate: springLeft, transformOrigin: "top left" }}
-        className="absolute top-0 left-0 w-[360px] h-[850px]"
+    <div className="fixed inset-0 pointer-events-none z-40 overflow-hidden">
+      {/* --- TOP HEADER CANOPY --- */}
+      <svg
+        className="absolute top-0 left-0 w-full h-24 sm:h-32 md:h-40 text-[#1b3320] opacity-85"
+        preserveAspectRatio="none"
+        viewBox="0 0 1200 120"
+        fill="currentColor"
       >
-        <svg className="w-full h-full" viewBox="0 0 360 850" fill="none">
-          {/* Main Thick Branch Stems */}
-          <path d="M 10 -10 Q 70 200, 20 400 T 90 750 T 60 840" stroke="#1B3022" strokeWidth="8" strokeLinecap="round" />
-          <path d="M 30 -10 Q 90 180, 40 380 T 110 710" stroke="#2A4230" strokeWidth="5" strokeLinecap="round" />
-          <path d="M 50 -10 Q 120 150, 70 320 T 130 600" stroke="#142318" strokeWidth="3" strokeLinecap="round" />
+        <path d="M-20,10 Q300,35 600,15 T1220,10 L1220,-20 L-20,-20 Z" />
+        <g opacity="0.9">
+          {/* Left top hanging clusters */}
+          <path d="M40,15 Q30,45 20,70 Q25,75 35,60 Q45,35 50,15 Z" />
+          <path d="M80,20 Q95,55 110,85 Q118,80 108,60 Q98,35 85,18 Z" />
+          <path d="M160,18 Q140,50 130,80 Q140,82 148,65 Q165,40 168,18 Z" />
+          <path d="M240,22 Q260,60 270,95 Q278,90 272,70 Q258,40 245,20 Z" />
 
-          {/* DENSE LEAF PAIRS & FLOWERS ALONG VINE */}
-          {/* Top Cluster */}
-          <DetailedLeaf x={30} y={60} scale={1.3} rotate={-40} fill="#1B3022" delay={0.1} />
-          <DetailedLeaf x={45} y={80} scale={1.2} rotate={50} fill="#2A4230" delay={0.3} />
-          <FlowerBud x={25} y={100} scale={1.1} rotate={-20} />
+          {/* Center sparse top dips (Kept minimal so content is completely clear) */}
+          <path d="M450,15 Q460,32 455,45 Q465,43 468,32 Z" />
+          <path d="M580,12 Q575,28 585,38 Q590,34 588,22 Z" />
+          <path d="M720,15 Q730,35 725,48 Q735,44 732,28 Z" />
 
-          {/* Upper Middle */}
-          <DetailedLeaf x={55} y={160} scale={1.4} rotate={-30} fill="#1B3022" delay={0.2} />
-          <DetailedLeaf x={75} y={190} scale={1.3} rotate={60} fill="#2A4230" delay={0.5} />
-          <DetailedLeaf x={40} y={230} scale={1.5} rotate={-55} fill="#142318" delay={0.4} />
+          {/* Right top hanging clusters */}
+          <path d="M920,18 Q900,55 890,90 Q900,92 908,70 Q925,45 928,18 Z" />
+          <path d="M1020,20 Q1040,60 1050,100 Q1058,95 1052,70 Q1038,40 1025,20 Z" />
+          <path d="M1120,15 Q1110,50 1100,85 Q1110,88 1118,68 Q1128,42 1125,15 Z" />
+        </g>
+      </svg>
 
-          {/* Center Dense Section */}
-          <DetailedLeaf x={25} y={310} scale={1.4} rotate={35} fill="#1B3022" delay={0.6} />
-          <DetailedLeaf x={45} y={340} scale={1.3} rotate={-45} fill="#2A4230" delay={0.1} />
-          <FlowerBud x={30} y={370} scale={1.2} rotate={15} />
-
-          <DetailedLeaf x={60} y={430} scale={1.5} rotate={50} fill="#1B3022" delay={0.3} />
-          <DetailedLeaf x={85} y={470} scale={1.3} rotate={-35} fill="#142318" delay={0.7} />
-          <DetailedLeaf x={105} y={520} scale={1.2} rotate={40} fill="#2A4230" delay={0.2} />
-
-          {/* Lower Tail */}
-          <DetailedLeaf x={90} y={610} scale={1.3} rotate={-50} fill="#1B3022" delay={0.5} />
-          <DetailedLeaf x={100} y={660} scale={1.2} rotate={30} fill="#2A4230" delay={0.3} />
-          <FlowerBud x={85} y={700} scale={1} rotate={-10} />
-          <DetailedLeaf x={75} y={760} scale={1.1} rotate={-30} fill="#142318" delay={0.4} />
-          <DetailedLeaf x={60} y={820} scale={0.9} rotate={15} fill="#1B3022" delay={0.2} />
-        </svg>
-      </motion.div>
-
-      {/* ================= MID-LEFT TENDRIL ================= */}
-      <motion.div
-        style={{ rotate: springLeft, transformOrigin: "top center" }}
-        className="absolute top-0 left-[20%] w-[240px] h-[600px] hidden sm:block"
+      {/* --- LEFT FLANKING VINE CURTAIN --- */}
+      <svg
+        className="absolute top-0 left-0 h-full w-20 sm:w-32 md:w-48 text-[#1b3320] opacity-80"
+        preserveAspectRatio="none"
+        viewBox="0 0 150 800"
+        fill="currentColor"
       >
-        <svg className="w-full h-full" viewBox="0 0 240 600" fill="none">
-          <path d="M 120 -10 Q 170 150, 110 320 T 150 580" stroke="#1B3022" strokeWidth="5" strokeLinecap="round" />
-          <path d="M 130 -10 Q 150 120, 125 260" stroke="#2A4230" strokeWidth="3" strokeLinecap="round" />
+        <path d="M10,-10 Q25,200 15,400 T20,810" stroke="currentColor" strokeWidth="3" fill="none" />
+        <path d="M35,-10 Q50,180 30,380 T40,810" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.6" />
 
-          <DetailedLeaf x={135} y={70} scale={1.2} rotate={30} fill="#1B3022" delay={0.2} />
-          <DetailedLeaf x={155} y={140} scale={1.3} rotate={-40} fill="#2A4230" delay={0.5} />
-          <FlowerBud x={140} y={200} scale={0.9} rotate={20} />
+        <g>
+          <circle cx="20" cy="40" r="14" />
+          <circle cx="45" cy="60" r="18" />
+          <circle cx="30" cy="110" r="16" />
+          <circle cx="55" cy="140" r="20" />
+          <circle cx="25" cy="190" r="15" />
+          <path d="M15,220 C45,230 60,260 50,290 C35,310 20,280 15,220 Z" />
+          <circle cx="40" cy="270" r="14" />
+          <circle cx="20" cy="340" r="16" />
+          <circle cx="48" cy="390" r="18" />
 
-          <DetailedLeaf x={115} y={270} scale={1.4} rotate={45} fill="#142318" delay={0.3} />
-          <DetailedLeaf x={130} y={350} scale={1.2} rotate={-35} fill="#1B3022" delay={0.6} />
-          <DetailedLeaf x={145} y={440} scale={1.1} rotate={25} fill="#2A4230" delay={0.1} />
-          <DetailedLeaf x={150} y={540} scale={0.9} rotate={-15} fill="#1B3022" delay={0.4} />
-        </svg>
-      </motion.div>
+          {/* Lower Trailing Vine Strand */}
+          <path d="M20,450 C50,470 65,520 40,560 C20,590 10,630 30,670 C45,700 25,740 15,780" stroke="currentColor" strokeWidth="2.5" fill="none" />
+          <circle cx="35" cy="490" r="12" />
+          <circle cx="45" cy="540" r="13" />
+          <circle cx="20" cy="610" r="11" />
+          <circle cx="32" cy="660" r="14" />
+          <circle cx="22" cy="720" r="10" />
+        </g>
+      </svg>
 
-      {/* ================= MID-RIGHT TENDRIL ================= */}
-      <motion.div
-        style={{ rotate: springRight, transformOrigin: "top center" }}
-        className="absolute top-0 right-[20%] w-[240px] h-[620px] hidden sm:block"
+      {/* --- RIGHT FLANKING VINE CURTAIN --- */}
+      <svg
+        className="absolute top-0 right-0 h-full w-20 sm:w-32 md:w-48 text-[#1b3320] opacity-80"
+        preserveAspectRatio="none"
+        viewBox="0 0 150 800"
+        fill="currentColor"
       >
-        <svg className="w-full h-full" viewBox="0 0 240 620" fill="none">
-          <path d="M 120 -10 Q 70 160, 130 330 T 90 600" stroke="#1B3022" strokeWidth="5" strokeLinecap="round" />
-          <path d="M 110 -10 Q 85 130, 115 270" stroke="#2A4230" strokeWidth="3" strokeLinecap="round" />
+        <path d="M140,-10 Q125,200 135,400 T130,810" stroke="currentColor" strokeWidth="3" fill="none" />
+        <path d="M115,-10 Q100,180 120,380 T110,810" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.6" />
 
-          <DetailedLeaf x={105} y={80} scale={1.2} rotate={-30} fill="#1B3022" delay={0.4} />
-          <DetailedLeaf x={85} y={150} scale={1.3} rotate={40} fill="#2A4230" delay={0.1} />
-          <FlowerBud x={100} y={210} scale={0.9} rotate={-20} />
+        <g>
+          <circle cx="130" cy="40" r="14" />
+          <circle cx="105" cy="65" r="19" />
+          <circle cx="120" cy="120" r="16" />
+          <circle cx="95" cy="150" r="22" />
+          <circle cx="125" cy="200" r="15" />
 
-          <DetailedLeaf x={125} y={280} scale={1.4} rotate={-45} fill="#142318" delay={0.7} />
-          <DetailedLeaf x={110} y={360} scale={1.2} rotate={35} fill="#1B3022" delay={0.3} />
-          <DetailedLeaf x={95} y={450} scale={1.1} rotate={-25} fill="#2A4230" delay={0.5} />
-          <DetailedLeaf x={90} y={560} scale={0.9} rotate={15} fill="#1B3022" delay={0.2} />
-        </svg>
-      </motion.div>
-
-      {/* ================= FAR RIGHT HEAVY VINE DRAPE ================= */}
-      <motion.div
-        style={{ rotate: springRight, transformOrigin: "top right" }}
-        className="absolute top-0 right-0 w-[360px] h-[860px]"
-      >
-        <svg className="w-full h-full transform scale-x-[-1]" viewBox="0 0 360 860" fill="none">
-          {/* Main Thick Branch Stems */}
-          <path d="M 10 -10 Q 70 200, 20 400 T 90 750 T 60 850" stroke="#1B3022" strokeWidth="8" strokeLinecap="round" />
-          <path d="M 30 -10 Q 90 180, 40 380 T 110 720" stroke="#2A4230" strokeWidth="5" strokeLinecap="round" />
-          <path d="M 50 -10 Q 120 150, 70 320 T 130 610" stroke="#142318" strokeWidth="3" strokeLinecap="round" />
-
-          {/* DENSE LEAF PAIRS & FLOWERS ALONG VINE */}
-          <DetailedLeaf x={30} y={65} scale={1.3} rotate={-40} fill="#1B3022" delay={0.2} />
-          <DetailedLeaf x={45} y={85} scale={1.2} rotate={50} fill="#2A4230" delay={0.4} />
-          <FlowerBud x={25} y={105} scale={1.1} rotate={-20} />
-
-          <DetailedLeaf x={55} y={165} scale={1.4} rotate={-30} fill="#1B3022" delay={0.3} />
-          <DetailedLeaf x={75} y={195} scale={1.3} rotate={60} fill="#2A4230" delay={0.6} />
-          <DetailedLeaf x={40} y={235} scale={1.5} rotate={-55} fill="#142318" delay={0.1} />
-
-          <DetailedLeaf x={25} y={315} scale={1.4} rotate={35} fill="#1B3022" delay={0.5} />
-          <DetailedLeaf x={45} y={345} scale={1.3} rotate={-45} fill="#2A4230" delay={0.3} />
-          <FlowerBud x={30} y={375} scale={1.2} rotate={15} />
-
-          <DetailedLeaf x={60} y={435} scale={1.5} rotate={50} fill="#1B3022" delay={0.7} />
-          <DetailedLeaf x={85} y={475} scale={1.3} rotate={-35} fill="#142318" delay={0.2} />
-          <DetailedLeaf x={105} y={525} scale={1.2} rotate={40} fill="#2A4230" delay={0.6} />
-
-          <DetailedLeaf x={90} y={615} scale={1.3} rotate={-50} fill="#1B3022" delay={0.4} />
-          <DetailedLeaf x={100} y={665} scale={1.2} rotate={30} fill="#2A4230" delay={0.1} />
-          <FlowerBud x={85} y={705} scale={1} rotate={-10} />
-          <DetailedLeaf x={75} y={765} scale={1.1} rotate={-30} fill="#142318" delay={0.3} />
-          <DetailedLeaf x={60} y={825} scale={0.9} rotate={15} fill="#1B3022" delay={0.5} />
-        </svg>
-      </motion.div>
+          {/* Long Right Side Drapes */}
+          <path d="M135,230 C105,240 90,280 100,320 C115,350 130,310 135,230 Z" />
+          <circle cx="110" cy="280" r="15" />
+          <circle cx="125" cy="350" r="17" />
+          <circle cx="100" cy="410" r="16" />
+          <circle cx="118" cy="480" r="14" />
+          <circle cx="128" cy="550" r="13" />
+          <circle cx="110" cy="620" r="12" />
+          <circle cx="122" cy="700" r="11" />
+        </g>
+      </svg>
     </div>
   );
 }
@@ -255,6 +151,9 @@ export default function App() {
 
   return (
     <div className="relative bg-[#EFF4EC] text-[#273229] min-h-screen antialiased overflow-x-hidden font-['Plus_Jakarta_Sans',sans-serif]">
+      {/* Fixed Botanical Overlay Frame */}
+      <VineArchOverlay />
+
       <motion.div
         style={{ y: bgY }}
         className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(194,214,188,0.4),rgba(239,244,236,0.95))] z-0 pointer-events-none"
@@ -262,52 +161,54 @@ export default function App() {
 
       <Navbar />
 
-      <ScrollFocusSection>
-        <Hero />
-      </ScrollFocusSection>
+      <main className="relative z-10 max-w-5xl mx-auto px-6">
+        <ScrollFocusSection>
+          <Hero />
+        </ScrollFocusSection>
 
-      <FloralDivider />
+        <FloralDivider />
 
-      <ScrollFocusSection id="announcements">
-        <Announcements />
-      </ScrollFocusSection>
+        <ScrollFocusSection id="announcements">
+          <Announcements />
+        </ScrollFocusSection>
 
-      <FloralDivider />
+        <FloralDivider />
 
-      <ScrollFocusSection id="rules">
-        <GuildRulesSection />
-      </ScrollFocusSection>
+        <ScrollFocusSection id="rules">
+          <GuildRulesSection />
+        </ScrollFocusSection>
 
-      <FloralDivider />
+        <FloralDivider />
 
-      <ScrollFocusSection id="events">
-        <EventsCalendar />
-      </ScrollFocusSection>
+        <ScrollFocusSection id="events">
+          <EventsCalendar />
+        </ScrollFocusSection>
 
-      <FloralDivider />
+        <FloralDivider />
 
-      <ScrollFocusSection id="wiki">
-        <WikiSection />
-      </ScrollFocusSection>
+        <ScrollFocusSection id="wiki">
+          <WikiSection />
+        </ScrollFocusSection>
 
-      <FloralDivider />
+        <FloralDivider />
 
-      <ScrollFocusSection id="roster">
-        <Roster />
-      </ScrollFocusSection>
+        <ScrollFocusSection id="roster">
+          <Roster />
+        </ScrollFocusSection>
 
-      <FloralDivider />
+        <FloralDivider />
 
-      <ScrollFocusSection id="join">
-        <JoinSection />
-      </ScrollFocusSection>
+        <ScrollFocusSection id="join">
+          <JoinSection />
+        </ScrollFocusSection>
+      </main>
 
       <Footer />
     </div>
   );
 }
 
-/* ---------------- ELEGANT FLORAL DIVIDER ---------------- */
+/* ---------------- FLORAL DIVIDER ---------------- */
 
 function FloralDivider() {
   return (
@@ -319,7 +220,7 @@ function FloralDivider() {
   );
 }
 
-/* ---------------- STICKY NAVBAR WITH ANCHORED VINES ---------------- */
+/* ---------------- STICKY NAVBAR ---------------- */
 
 function Navbar() {
   return (
@@ -356,8 +257,6 @@ function Navbar() {
           ))}
         </div>
       </div>
-
-      <LushHangingVines />
     </header>
   );
 }
@@ -366,7 +265,7 @@ function Navbar() {
 
 function Hero() {
   return (
-    <section className="pt-28 pb-12 text-center relative z-10 max-w-4xl mx-auto px-6">
+    <section className="pt-24 pb-12 text-center relative z-10 max-w-3xl mx-auto">
       <motion.div variants={stagger} initial="hidden" animate="visible">
         <motion.div variants={fadeUp} className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full bg-white border border-[#A6C49F] text-[#1C2E20] text-[11px] font-bold tracking-[0.18em] uppercase shadow-sm">
           <span className="text-xs">✦</span> Garden Sanctuary & Guild
@@ -438,7 +337,7 @@ const announcementData = [
 
 function Announcements() {
   return (
-    <section className="max-w-5xl mx-auto px-6 py-6">
+    <section className="py-6">
       <div className="flex items-center gap-3 mb-8">
         <FaBullhorn className="text-[#1C2E20] text-base" />
         <h2 className="text-2xl font-['Cinzel',serif] text-[#1C2E20] tracking-wider uppercase font-bold">Announcements</h2>
@@ -526,7 +425,7 @@ const officialRules = [
 
 function GuildRulesSection() {
   return (
-    <section className="max-w-6xl mx-auto px-6 py-6">
+    <section className="py-6">
       <div className="text-center mb-10">
         <span className="text-[10px] tracking-[0.25em] text-[#1C2E20] uppercase font-bold block mb-1">
           Sanctuary Covenant
@@ -575,7 +474,7 @@ const eventData = [
 
 function EventsCalendar() {
   return (
-    <section className="max-w-5xl mx-auto px-6 py-6">
+    <section className="py-6">
       <div className="flex items-center gap-3 mb-8">
         <FaCalendarAlt className="text-[#1C2E20] text-base" />
         <h2 className="text-2xl font-['Cinzel',serif] text-[#1C2E20] tracking-wider uppercase font-bold">Gatherings</h2>
@@ -607,7 +506,7 @@ const wikiTopics = [
 
 function WikiSection() {
   return (
-    <section className="max-w-5xl mx-auto px-6 py-6">
+    <section className="py-6">
       <div className="flex items-center gap-3 mb-8">
         <FaBook className="text-[#1C2E20] text-base" />
         <h2 className="text-2xl font-['Cinzel',serif] text-[#1C2E20] tracking-wider uppercase font-bold">Field Guides</h2>
@@ -641,7 +540,7 @@ const officers = [
 
 function Roster() {
   return (
-    <section className="max-w-5xl mx-auto px-6 py-6">
+    <section className="py-6">
       <div className="flex items-center gap-3 mb-8">
         <FaShieldAlt className="text-[#1C2E20] text-base" />
         <h2 className="text-2xl font-['Cinzel',serif] text-[#1C2E20] tracking-wider uppercase font-bold">Guardians</h2>
@@ -672,7 +571,7 @@ function Roster() {
 
 function JoinSection() {
   return (
-    <section className="relative z-10 py-12 text-center max-w-3xl mx-auto px-6">
+    <section className="relative z-10 py-12 text-center max-w-3xl mx-auto">
       <div className="p-10 md:p-14 rounded-3xl bg-white border border-[#A6C49F] shadow-lg relative">
         <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-[#E5EFE2] border border-[#A6C49F] flex items-center justify-center text-[#1C2E20] text-sm font-serif">
           ❦
@@ -683,7 +582,7 @@ function JoinSection() {
         <h2 className="text-3xl md:text-4xl font-['Cinzel',serif] text-[#1C2E20] tracking-wider uppercase mb-3 font-bold">
           Find Your Place in Eve
         </h2>
-        <p className="font-[#Cormorant_Garamond',serif] italic text-xl text-[#1C2E20] mb-6 font-bold">
+        <p className="font-['Cormorant_Garamond',serif] italic text-xl text-[#1C2E20] mb-6 font-bold">
           "We Welcome All"
         </p>
         <p className="text-[#3A483C] text-xs md:text-sm mb-8 max-w-md mx-auto leading-relaxed font-medium">
@@ -708,7 +607,7 @@ function JoinSection() {
 
 function Footer() {
   return (
-    <footer className="text-center py-10 text-[#526354] text-xs font-bold tracking-widest uppercase">
+    <footer className="text-center py-10 text-[#526354] text-xs font-bold tracking-widest uppercase relative z-10">
       © {new Date().getFullYear()} Eve Guild · Est. 2026 · Planted with Care ❦
     </footer>
   );
