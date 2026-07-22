@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { ReactNode } from "react";
 import { FaDiscord, FaBook, FaCalendarAlt, FaBullhorn, FaShieldAlt } from "react-icons/fa";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -40,6 +40,137 @@ function ScrollFocusSection({ children, id }: { children: ReactNode; id?: string
   );
 }
 
+/* ---------------- INTERACTIVE FALLING PETALS / NATURE EFFECT ---------------- */
+
+interface Petal {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
+  speedY: number;
+  speedX: number;
+  rotation: number;
+  rotSpeed: number;
+  opacity: number;
+}
+
+function FallingPetalsCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const mouseRef = useRef({ x: -1000, y: -1000, vx: 0, vy: 0 });
+  const lastMouseRef = useRef({ x: 0, y: 0, time: Date.now() });
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animationFrameId: number;
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    const handleResize = () => {
+      if (!canvas) return;
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+    window.addEventListener("resize", handleResize);
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const now = Date.now();
+      const dt = (now - lastMouseRef.current.time) || 16;
+      const vx = (e.clientX - lastMouseRef.current.x) / dt;
+      const vy = (e.clientY - lastMouseRef.current.y) / dt;
+
+      mouseRef.current = { x: e.clientX, y: e.clientY, vx, vy };
+      lastMouseRef.current = { x: e.clientX, y: e.clientY, time: now };
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+
+    // Initialize gentle falling elements (petals & pollen specs)
+    const count = Math.floor((width * height) / 22000);
+    const petals: Petal[] = Array.from({ length: count }, (_, i) => ({
+      id: i,
+      x: Math.random() * width,
+      y: Math.random() * height - height,
+      size: Math.random() * 6 + 4,
+      speedY: Math.random() * 0.8 + 0.4,
+      speedX: (Math.random() - 0.5) * 0.6,
+      rotation: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 1.5,
+      opacity: Math.random() * 0.5 + 0.3,
+    }));
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      const m = mouseRef.current;
+
+      petals.forEach((p) => {
+        // Move down and drift
+        p.y += p.speedY;
+        p.x += p.speedX + Math.sin(p.y * 0.01) * 0.4;
+        p.rotation += p.rotSpeed;
+
+        // Reactive mouse gravity / wind push
+        const dx = p.x - m.x;
+        const dy = p.y - m.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const maxDist = 140;
+
+        if (dist < maxDist && dist > 0) {
+          const force = (1 - dist / maxDist);
+          // Push away and impart mouse velocity vector
+          p.x += (dx / dist) * force * 6 + m.vx * 4;
+          p.y += (dy / dist) * force * 4 + m.vy * 4;
+        }
+
+        // Recycle to top if out of bounds
+        if (p.y > height + 20) {
+          p.y = -20;
+          p.x = Math.random() * width;
+        }
+        if (p.x < -20) p.x = width + 20;
+        if (p.x > width + 20) p.x = -20;
+
+        // Draw soft organic petal shape
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.globalAlpha = p.opacity;
+        ctx.fillStyle = "#A6C49F";
+
+        ctx.beginPath();
+        ctx.ellipse(0, 0, p.size, p.size * 0.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      });
+
+      // Decay mouse velocity when idle
+      mouseRef.current.vx *= 0.9;
+      mouseRef.current.vy *= 0.9;
+
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("mousemove", handleMouseMove);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 pointer-events-none z-30"
+    />
+  );
+}
+
 /* ---------------- MAIN APP ---------------- */
 
 export default function App() {
@@ -56,6 +187,9 @@ export default function App() {
 
   return (
     <div className="relative bg-[#EFF4EC] text-[#273229] min-h-screen antialiased overflow-x-hidden font-['Plus_Jakarta_Sans',sans-serif]">
+      {/* Interactive physics-driven natural falling petals */}
+      <FallingPetalsCanvas />
+
       <motion.div
         style={{ y: bgY }}
         className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(194,214,188,0.5),rgba(239,244,236,0.98))] z-0 pointer-events-none"
@@ -146,7 +280,7 @@ function Navbar() {
             { id: "rules", label: "Guidelines" },
             { id: "events", label: "Gatherings" },
             { id: "wiki", label: "Guides" },
-            { id: "roster", label: "Hierarchy" },
+            { id: "roster", label: "Council" },
             { id: "join", label: "Join" },
           ].map((item) => (
             <a
@@ -434,7 +568,7 @@ function WikiSection() {
 
 /* ---------------- ROSTER ---------------- */
 
-const hierarchy = [
+const councilMembers = [
   { name: "lychee", role: "The Sovereign" },
   { name: "juju", role: "Seraphim" },
   { name: "xSumo", role: "Cherubim" },
@@ -445,21 +579,21 @@ function Roster() {
     <section className="py-6">
       <div className="flex items-center gap-3 mb-8">
         <FaShieldAlt className="text-[#1C2E20] text-base" />
-        <h2 className="text-2xl font-['Cinzel',serif] text-[#1C2E20] tracking-wider uppercase font-bold">Divine Hierarchy</h2>
+        <h2 className="text-2xl font-['Cinzel',serif] text-[#1C2E20] tracking-wider uppercase font-bold">The Council</h2>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
-        {hierarchy.map((h) => (
+        {councilMembers.map((c) => (
           <div
-            key={h.name}
+            key={c.name}
             className="p-6 rounded-2xl bg-white border border-[#A6C49F] flex items-center gap-4 shadow-sm"
           >
             <div className="w-11 h-11 rounded-full bg-[#E5EFE2] border border-[#A6C49F] flex items-center justify-center font-['Cinzel',serif] text-sm font-bold text-[#1C2E20]">
-              {h.name.charAt(0)}
+              {c.name.charAt(0)}
             </div>
             <div>
-              <h3 className="text-sm font-['Cinzel',serif] font-bold text-[#1C2E20] tracking-wide">{h.name}</h3>
-              <p className="text-[10px] tracking-wider uppercase text-[#2F4832] font-bold">{h.role}</p>
+              <h3 className="text-sm font-['Cinzel',serif] font-bold text-[#1C2E20] tracking-wide">{c.name}</h3>
+              <p className="text-[10px] tracking-wider uppercase text-[#2F4832] font-bold">{c.role}</p>
             </div>
           </div>
         ))}
