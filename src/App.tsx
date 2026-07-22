@@ -88,6 +88,40 @@ function NaturePhysicsCanvas() {
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
+    // Initialize overlapping, physics-driven rope/spring vines
+    let vines: Vine[] = [];
+    const initVines = () => {
+      vines = [];
+      const numVines = Math.max(12, Math.floor(width / 110));
+      for (let i = 0; i <= numVines; i++) {
+        const startX = (width / numVines) * i + (Math.random() * 40 - 20);
+        const length = 180 + Math.random() * 220; // Original long draping style
+        const segmentCount = 14;
+        const segments: VineNode[] = [];
+
+        for (let j = 0; j < segmentCount; j++) {
+          const segY = (length / segmentCount) * j;
+          segments.push({
+            x: startX,
+            y: segY,
+            vx: 0,
+            vy: 0,
+            originalX: startX,
+            originalY: segY,
+          });
+        }
+
+        vines.push({
+          startX,
+          length,
+          segments,
+          swayFreq: 0.0015 + Math.random() * 0.001,
+          swayAmp: 12 + Math.random() * 18,
+        });
+      }
+    };
+    initVines();
+
     const handleResize = () => {
       if (!canvas) return;
       width = canvas.width = window.innerWidth;
@@ -110,47 +144,13 @@ function NaturePhysicsCanvas() {
     const handleScroll = () => {
       const currentScroll = window.scrollY;
       const delta = currentScroll - lastScrollYRef.current;
-      scrollVelocityRef.current = delta * 0.35; // Impart momentum on scroll
+      // Impart satisfying vertical stretch and bounce on scroll
+      scrollVelocityRef.current = delta * 0.45;
       lastScrollYRef.current = currentScroll;
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
 
-    // Initialize overlapping, physics-driven rope/spring vines
-    let vines: Vine[] = [];
-    const initVines = () => {
-      vines = [];
-      // Dense layout spanning across the top with overlapping intervals
-      const numVines = Math.max(10, Math.floor(width / 130));
-      for (let i = 0; i <= numVines; i++) {
-        const startX = (width / numVines) * i + (Math.random() * 40 - 20);
-        const length = 220 + Math.random() * 160;
-        const segmentCount = 12;
-        const segments: VineNode[] = [];
-
-        for (let j = 0; j < segmentCount; j++) {
-          const segY = (length / segmentCount) * j;
-          segments.push({
-            x: startX,
-            y: segY,
-            vx: 0,
-            vy: 0,
-            originalX: startX,
-            originalY: segY,
-          });
-        }
-
-        vines.push({
-          startX,
-          length,
-          segments,
-          swayFreq: 0.0015 + Math.random() * 0.001,
-          swayAmp: 15 + Math.random() * 20,
-        });
-      }
-    };
-    initVines();
-
-    // Initialize falling petals
+    // Initialize gentle falling petals
     const count = Math.floor((width * height) / 22000);
     const petals: Petal[] = Array.from({ length: count }, (_, i) => ({
       id: i,
@@ -170,55 +170,53 @@ function NaturePhysicsCanvas() {
       time += 1;
       ctx.clearRect(0, 0, width, height);
 
-      // Dampen scroll momentum over time
-      scrollVelocityRef.current *= 0.92;
+      // Smoothly decay scroll momentum
+      scrollVelocityRef.current *= 0.88;
       const scrollForce = scrollVelocityRef.current;
-
       const m = mouseRef.current;
 
-      // 1. Render & Update Physics Vines (Spring-mass & Gentle Breeze)
+      // 1. Render & Update Physics Vines (Spring-mass + Scroll Bounce + Gentle Breeze)
       ctx.save();
       vines.forEach((v) => {
         const segs = v.segments;
-        const spacing = v.length / segs.length;
 
-        // Update spring points
         segs.forEach((seg, idx) => {
-          if (idx === 0) return; // Anchor at top
+          if (idx === 0) return; // Top anchor remains fixed
 
-          const targetY = v.startX; // simplified reference for natural anchor
-          // Gentle breeze oscillation
-          const breeze = Math.sin(time * v.swayFreq * 50 + idx * 0.4) * (v.swayAmp * (idx / segs.length));
-          const targetX = seg.originalX + breeze + scrollForce * (idx * 0.1);
+          // Gentle horizontal breeze calculation
+          const breeze = Math.sin(time * v.swayFreq * 50 + idx * 0.3) * (v.swayAmp * (idx / segs.length));
+          const targetX = seg.originalX + breeze;
+          // Apply vertical scroll stretch proportional to how low the leaf hangs
+          const targetY = seg.originalY + scrollForce * (idx * 0.18);
           
-          // Spring force towards target
+          // Hooke's Law spring force
           const dx = targetX - seg.x;
-          const dy = (v.originalY + idx * spacing) - seg.y;
+          const dy = targetY - seg.y;
           
-          seg.vx += dx * 0.08;
-          seg.vy += dy * 0.08;
+          seg.vx += dx * 0.09;
+          seg.vy += dy * 0.09;
 
-          // Mouse interaction / collision
+          // Mouse proximity push
           const mdx = seg.x - m.x;
           const mdy = seg.y - m.y;
           const mdist = Math.sqrt(mdx * mdx + mdy * mdy);
-          if (mdist < 120 && mdist > 0) {
-            const push = (1 - mdist / 120);
-            seg.vx += (mdx / mdist) * push * 5 + m.vx * 2;
-            seg.vy += (mdy / mdist) * push * 3 + m.vy * 2;
+          if (mdist < 130 && mdist > 0) {
+            const push = (1 - mdist / 130);
+            seg.vx += (mdx / mdist) * push * 6 + m.vx * 2;
+            seg.vy += (mdy / mdist) * push * 4 + m.vy * 2;
           }
 
-          // Friction damping
-          seg.vx *= 0.84;
-          seg.vy *= 0.84;
+          // Damping friction
+          seg.vx *= 0.82;
+          seg.vy *= 0.82;
 
           seg.x += seg.vx;
           seg.y += seg.vy;
         });
 
-        // Draw Vine Strand with overlapping curves
+        // Draw Vine Stem
         ctx.strokeStyle = "#2F4832";
-        ctx.lineWidth = 2.8;
+        ctx.lineWidth = 2.6;
         ctx.lineCap = "round";
         ctx.beginPath();
         ctx.moveTo(segs[0].x, segs[0].y);
@@ -230,17 +228,28 @@ function NaturePhysicsCanvas() {
         }
         ctx.stroke();
 
-        // Draw overlapping lush leaves along the segments
+        // Draw Overlapping Cute Organic Leaves along every segment
         segs.forEach((seg, idx) => {
-          if (idx > 1 && idx % 2 === 0) {
+          if (idx > 0 && idx % 2 === 0) {
             ctx.save();
             ctx.translate(seg.x, seg.y);
             const angle = Math.atan2(seg.vy, seg.vx) + (idx % 4 === 0 ? 0.6 : -0.6);
             ctx.rotate(angle);
+            
+            // Alternate lush leaf tones for depth
             ctx.fillStyle = idx % 4 === 0 ? "#3A5A40" : "#4A704C";
             ctx.beginPath();
-            ctx.ellipse(0, 0, 11, 5, 0, 0, Math.PI * 2);
+            ctx.ellipse(0, 0, 12, 5.5, 0, 0, Math.PI * 2);
             ctx.fill();
+            
+            // Draw delicate inner leaf vein
+            ctx.strokeStyle = "#2F4832";
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(-8, 0);
+            ctx.lineTo(8, 0);
+            ctx.stroke();
+            
             ctx.restore();
           }
         });
@@ -324,7 +333,6 @@ export default function App() {
 
   return (
     <div className="relative bg-[#EFF4EC] text-[#273229] min-h-screen antialiased overflow-x-hidden font-['Plus_Jakarta_Sans',sans-serif]">
-      {/* Physics-driven overlapping vines, scroll-bounce & gentle breeze */}
       <NaturePhysicsCanvas />
 
       <motion.div
