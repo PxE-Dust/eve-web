@@ -40,7 +40,7 @@ function ScrollFocusSection({ children, id }: { children: ReactNode; id?: string
   );
 }
 
-/* ---------------- VINES & FALLING PETALS COMPONENT ---------------- */
+/* ---------------- REACTIVE VINES & FALLING PETALS CANVAS ---------------- */
 
 interface Petal {
   id: number;
@@ -54,10 +54,29 @@ interface Petal {
   opacity: number;
 }
 
-function VinesAndPetalsCanvas() {
+interface VineNode {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  originalX: number;
+  originalY: number;
+}
+
+interface Vine {
+  startX: number;
+  length: number;
+  segments: VineNode[];
+  swayFreq: number;
+  swayAmp: number;
+}
+
+function NaturePhysicsCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const mouseRef = useRef({ x: -1000, y: -1000, vx: 0, vy: 0 });
   const lastMouseRef = useRef({ x: 0, y: 0, time: Date.now() });
+  const lastScrollYRef = useRef(0);
+  const scrollVelocityRef = useRef(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -73,6 +92,7 @@ function VinesAndPetalsCanvas() {
       if (!canvas) return;
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
+      initVines();
     };
     window.addEventListener("resize", handleResize);
 
@@ -86,6 +106,49 @@ function VinesAndPetalsCanvas() {
       lastMouseRef.current = { x: e.clientX, y: e.clientY, time: now };
     };
     window.addEventListener("mousemove", handleMouseMove);
+
+    const handleScroll = () => {
+      const currentScroll = window.scrollY;
+      const delta = currentScroll - lastScrollYRef.current;
+      scrollVelocityRef.current = delta * 0.35; // Impart momentum on scroll
+      lastScrollYRef.current = currentScroll;
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    // Initialize overlapping, physics-driven rope/spring vines
+    let vines: Vine[] = [];
+    const initVines = () => {
+      vines = [];
+      // Dense layout spanning across the top with overlapping intervals
+      const numVines = Math.max(10, Math.floor(width / 130));
+      for (let i = 0; i <= numVines; i++) {
+        const startX = (width / numVines) * i + (Math.random() * 40 - 20);
+        const length = 220 + Math.random() * 160;
+        const segmentCount = 12;
+        const segments: VineNode[] = [];
+
+        for (let j = 0; j < segmentCount; j++) {
+          const segY = (length / segmentCount) * j;
+          segments.push({
+            x: startX,
+            y: segY,
+            vx: 0,
+            vy: 0,
+            originalX: startX,
+            originalY: segY,
+          });
+        }
+
+        vines.push({
+          startX,
+          length,
+          segments,
+          swayFreq: 0.0015 + Math.random() * 0.001,
+          swayAmp: 15 + Math.random() * 20,
+        });
+      }
+    };
+    initVines();
 
     // Initialize falling petals
     const count = Math.floor((width * height) / 22000);
@@ -101,76 +164,90 @@ function VinesAndPetalsCanvas() {
       opacity: Math.random() * 0.5 + 0.3,
     }));
 
-    // Helper to draw realistic hanging vines from the top corners and edges
-    const drawVines = () => {
-      ctx.save();
-      ctx.strokeStyle = "#2F4832";
-      ctx.lineWidth = 2.5;
-      ctx.lineCap = "round";
-
-      // Define vine anchor points across the top
-      const anchors = [
-        { x: 0, length: 180, curve: 40 },
-        { x: width * 0.12, length: 240, curve: -30 },
-        { x: width * 0.28, length: 150, curve: 20 },
-        { x: width * 0.45, length: 210, curve: -25 },
-        { x: width * 0.65, length: 190, curve: 35 },
-        { x: width * 0.82, length: 260, curve: -40 },
-        { x: width, length: 200, curve: 30 },
-      ];
-
-      anchors.forEach((anchor, idx) => {
-        ctx.beginPath();
-        ctx.moveTo(anchor.x, 0);
-
-        // Create an organic swaying/hanging bezier curve for each vine
-        const cp1x = anchor.x + anchor.curve;
-        const cp1y = anchor.length * 0.4;
-        const cp2x = anchor.x - anchor.curve * 0.8;
-        const cp2y = anchor.length * 0.75;
-        const endX = anchor.x + (idx % 2 === 0 ? 15 : -15);
-        const endY = anchor.length;
-
-        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, endX, endY);
-        ctx.stroke();
-
-        // Draw leaves along the vine
-        const leafSteps = 6;
-        for (let s = 1; s <= leafSteps; s++) {
-          const t = s / leafSteps;
-          // Approximate point along bezier for leaf placement
-          const lx = (1 - t) * (1 - t) * (1 - t) * anchor.x +
-                     3 * (1 - t) * (1 - t) * t * cp1x +
-                     3 * (1 - t) * t * t * cp2x +
-                     t * t * t * endX;
-          const ly = (1 - t) * (1 - t) * (1 - t) * 0 +
-                     3 * (1 - t) * (1 - t) * t * cp1y +
-                     3 * (1 - t) * t * t * cp2y +
-                     t * t * t * endY;
-
-          ctx.save();
-          ctx.translate(lx, ly);
-          ctx.rotate((s % 2 === 0 ? 35 : -35) * (Math.PI / 180));
-          ctx.fillStyle = "#3A5A40";
-          ctx.beginPath();
-          ctx.ellipse(0, 0, 9, 4.5, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        }
-      });
-
-      ctx.restore();
-    };
+    let time = 0;
 
     const render = () => {
+      time += 1;
       ctx.clearRect(0, 0, width, height);
 
-      // Render the original hanging vines first
-      drawVines();
+      // Dampen scroll momentum over time
+      scrollVelocityRef.current *= 0.92;
+      const scrollForce = scrollVelocityRef.current;
 
       const m = mouseRef.current;
 
-      // Render interactive falling petals
+      // 1. Render & Update Physics Vines (Spring-mass & Gentle Breeze)
+      ctx.save();
+      vines.forEach((v) => {
+        const segs = v.segments;
+        const spacing = v.length / segs.length;
+
+        // Update spring points
+        segs.forEach((seg, idx) => {
+          if (idx === 0) return; // Anchor at top
+
+          const targetY = v.startX; // simplified reference for natural anchor
+          // Gentle breeze oscillation
+          const breeze = Math.sin(time * v.swayFreq * 50 + idx * 0.4) * (v.swayAmp * (idx / segs.length));
+          const targetX = seg.originalX + breeze + scrollForce * (idx * 0.1);
+          
+          // Spring force towards target
+          const dx = targetX - seg.x;
+          const dy = (v.originalY + idx * spacing) - seg.y;
+          
+          seg.vx += dx * 0.08;
+          seg.vy += dy * 0.08;
+
+          // Mouse interaction / collision
+          const mdx = seg.x - m.x;
+          const mdy = seg.y - m.y;
+          const mdist = Math.sqrt(mdx * mdx + mdy * mdy);
+          if (mdist < 120 && mdist > 0) {
+            const push = (1 - mdist / 120);
+            seg.vx += (mdx / mdist) * push * 5 + m.vx * 2;
+            seg.vy += (mdy / mdist) * push * 3 + m.vy * 2;
+          }
+
+          // Friction damping
+          seg.vx *= 0.84;
+          seg.vy *= 0.84;
+
+          seg.x += seg.vx;
+          seg.y += seg.vy;
+        });
+
+        // Draw Vine Strand with overlapping curves
+        ctx.strokeStyle = "#2F4832";
+        ctx.lineWidth = 2.8;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(segs[0].x, segs[0].y);
+
+        for (let i = 1; i < segs.length - 1; i++) {
+          const xc = (segs[i].x + segs[i + 1].x) / 2;
+          const yc = (segs[i].y + segs[i + 1].y) / 2;
+          ctx.quadraticCurveTo(segs[i].x, segs[i].y, xc, yc);
+        }
+        ctx.stroke();
+
+        // Draw overlapping lush leaves along the segments
+        segs.forEach((seg, idx) => {
+          if (idx > 1 && idx % 2 === 0) {
+            ctx.save();
+            ctx.translate(seg.x, seg.y);
+            const angle = Math.atan2(seg.vy, seg.vx) + (idx % 4 === 0 ? 0.6 : -0.6);
+            ctx.rotate(angle);
+            ctx.fillStyle = idx % 4 === 0 ? "#3A5A40" : "#4A704C";
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 11, 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        });
+      });
+      ctx.restore();
+
+      // 2. Render Falling Petals with Mouse Gravity & Wind
       petals.forEach((p) => {
         p.y += p.speedY;
         p.x += p.speedX + Math.sin(p.y * 0.01) * 0.4;
@@ -218,6 +295,7 @@ function VinesAndPetalsCanvas() {
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("scroll", handleScroll);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
@@ -246,8 +324,8 @@ export default function App() {
 
   return (
     <div className="relative bg-[#EFF4EC] text-[#273229] min-h-screen antialiased overflow-x-hidden font-['Plus_Jakarta_Sans',sans-serif]">
-      {/* Original hanging vines + interactive falling petals */}
-      <VinesAndPetalsCanvas />
+      {/* Physics-driven overlapping vines, scroll-bounce & gentle breeze */}
+      <NaturePhysicsCanvas />
 
       <motion.div
         style={{ y: bgY }}
