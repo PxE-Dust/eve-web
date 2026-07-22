@@ -40,268 +40,199 @@ function ScrollFocusSection({ children, id }: { children: ReactNode; id?: string
   );
 }
 
-/* ---------------- FLOATING BOTANICAL ATMOSPHERE ---------------- */
+/* ---------------- REALISTIC BOTANICAL SVG ELEMENTS ---------------- */
 
-function BotanicalAtmosphere() {
-  return (
-    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      {/* Floating Soft Green Spores */}
-      {Array.from({ length: 14 }).map((_, i) => (
-        <motion.div
-          key={`spore-${i}`}
-          className="absolute w-2 h-2 rounded-full bg-[#8FA885]/35 blur-[1px]"
-          initial={{
-            x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1000),
-            y: Math.random() * (typeof window !== "undefined" ? window.innerHeight : 1000),
-            opacity: 0.2,
-          }}
-          animate={{
-            y: [-25, 25, -25],
-            opacity: [0.2, 0.6, 0.2],
-          }}
-          transition={{
-            duration: 6 + i * 2,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-/* ---------------- COOL MIST GLOW ---------------- */
-
-function CoolGlow() {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const move = (e: MouseEvent) => {
-      if (!ref.current) return;
-      ref.current.style.transform = `translate(${e.clientX - 120}px, ${e.clientY - 120}px)`;
-    };
-    window.addEventListener("mousemove", move);
-    return () => window.removeEventListener("mousemove", move);
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      className="pointer-events-none fixed top-0 left-0 w-[280px] h-[280px] rounded-full bg-[#C2D6BC]/35 blur-3xl z-0 transition-transform duration-150 ease-out"
-    />
-  );
-}
-
-/* ---------------- VECTOR LEAF CLUSTER SUB-COMPONENT ---------------- */
-
-interface LeafClusterProps {
+// Detailed Leaf with Stem & Vein Detail
+interface DetailedLeafProps {
   x: number;
   y: number;
   scale?: number;
   rotate?: number;
-  color?: string;
+  fill?: string;
   delay?: number;
 }
 
-function LeafCluster({ x, y, scale = 1, rotate = 0, color = "#1C2E20", delay = 0 }: LeafClusterProps) {
+function DetailedLeaf({ x, y, scale = 1, rotate = 0, fill = "#1B3022", delay = 0 }: DetailedLeafProps) {
   return (
     <motion.g
       transform={`translate(${x}, ${y}) scale(${scale}) rotate(${rotate})`}
-      animate={{
-        rotate: [rotate - 6, rotate + 6, rotate - 6],
-        scale: [scale * 0.96, scale * 1.04, scale * 0.96],
-      }}
-      transition={{
-        duration: 3.5 + delay,
-        repeat: Infinity,
-        ease: "easeInOut",
-        delay,
-      }}
+      animate={{ rotate: [rotate - 4, rotate + 4, rotate - 4] }}
+      transition={{ duration: 4 + delay, repeat: Infinity, ease: "easeInOut", delay }}
     >
-      {/* Central Stem connection */}
-      <path d="M 0 0 L 0 12" stroke={color} strokeWidth="2" opacity="0.8" />
-
-      {/* Main Center Leaf */}
+      {/* Leaf Shadow/Depth Layer */}
       <path
-        d="M 0 0 C -8 -16, -12 -28, 0 -38 C 12 -28, 8 -16, 0 0 Z"
-        fill={color}
+        d="M 0 0 C -12 -18, -16 -36, 0 -52 C 16 -36, 12 -18, 0 0 Z"
+        fill={fill}
       />
-      <path d="M 0 0 L 0 -32" stroke="#8FA885" strokeWidth="0.8" opacity="0.5" />
-
-      {/* Left Pair Leaf */}
-      <g transform="translate(-4, -10) rotate(-42)">
-        <path
-          d="M 0 0 C -6 -12, -10 -20, 0 -28 C 10 -20, 6 -12, 0 0 Z"
-          fill={color}
-          opacity="0.9"
-        />
-      </g>
-
-      {/* Right Pair Leaf */}
-      <g transform="translate(4, -10) rotate(42)">
-        <path
-          d="M 0 0 C -6 -12, -10 -20, 0 -28 C 10 -20, 6 -12, 0 0 Z"
-          fill={color}
-          opacity="0.9"
-        />
-      </g>
-
-      {/* Outer Tip Leaf */}
-      <g transform="translate(0, -22) scale(0.7)">
-        <path
-          d="M 0 0 C -6 -12, -10 -20, 0 -26 C 10 -20, 6 -12, 0 0 Z"
-          fill="#2A402D"
-        />
-      </g>
+      {/* Inner Leaf Highlights & Veins */}
+      <path d="M 0 0 L 0 -46" stroke="#527055" strokeWidth="1.2" strokeLinecap="round" opacity="0.6" />
+      <path d="M 0 -12 Q -6 -18 -10 -20" stroke="#527055" strokeWidth="0.8" opacity="0.5" />
+      <path d="M 0 -12 Q 6 -18 10 -20" stroke="#527055" strokeWidth="0.8" opacity="0.5" />
+      <path d="M 0 -26 Q -5 -30 -8 -32" stroke="#527055" strokeWidth="0.8" opacity="0.5" />
+      <path d="M 0 -26 Q 5 -30 8 -32" stroke="#527055" strokeWidth="0.8" opacity="0.5" />
     </motion.g>
   );
 }
 
-/* ---------------- LUSH DRAPED GREENERY ---------------- */
+// Rendered Flower Bud Accent
+function FlowerBud({ x, y, scale = 1, rotate = 0 }: { x: number; y: number; scale?: number; rotate?: number }) {
+  return (
+    <g transform={`translate(${x}, ${y}) scale(${scale}) rotate(${rotate})`}>
+      {/* Sepal base */}
+      <path d="M -4 4 C -6 -2, -2 -8, 0 -12 C 2 -8, 6 -2, 4 4 Z" fill="#2E4832" />
+      {/* Soft Petals */}
+      <path d="M -5 -4 C -10 -12, -4 -20, 0 -22 C 4 -20, 10 -12, 5 -4 Z" fill="#E8D2C4" />
+      <path d="M -3 -4 C -6 -10, -1 -16, 0 -18 C 1 -16, 6 -10, 3 -4 Z" fill="#F7EBE1" />
+    </g>
+  );
+}
+
+/* ---------------- LUSH DRAPING GREENERY & CANOPY ---------------- */
 
 function LushHangingVines() {
   const { scrollY } = useScroll();
   const scrollVelocity = useVelocity(scrollY);
 
-  const rawScrollAngleLeft = useTransform(scrollVelocity, [-2000, 2000], [14, -14]);
-  const rawScrollAngleRight = useTransform(scrollVelocity, [-2000, 2000], [-14, 14]);
+  const rawScrollAngleLeft = useTransform(scrollVelocity, [-2000, 2000], [10, -10]);
+  const rawScrollAngleRight = useTransform(scrollVelocity, [-2000, 2000], [-10, 10]);
 
-  const springLeft = useSpring(rawScrollAngleLeft, { stiffness: 18, damping: 8, mass: 1.2 });
-  const springRight = useSpring(rawScrollAngleRight, { stiffness: 18, damping: 8, mass: 1.2 });
+  const springLeft = useSpring(rawScrollAngleLeft, { stiffness: 20, damping: 10, mass: 1 });
+  const springRight = useSpring(rawScrollAngleRight, { stiffness: 20, damping: 10, mass: 1 });
 
   return (
     <div className="pointer-events-none absolute top-full inset-x-0 h-[880px] z-10 overflow-visible">
-      {/* ---------------- OVERHEAD DENSE TOP CANOPY ---------------- */}
-      <div className="absolute top-0 inset-x-0 h-[100px] pointer-events-none z-20 overflow-hidden">
-        <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 1200 100">
-          <defs>
-            <linearGradient id="canopyGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#1C2E20" stopOpacity="0.95" />
-              <stop offset="70%" stopColor="#243828" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#243828" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-
-          {/* Continuous canopy fill */}
-          <rect width="1200" height="60" fill="url(#canopyGrad)" />
-
-          {/* Draped canopy leaf silhouette clusters across header beam */}
-          {Array.from({ length: 28 }).map((_, i) => {
-            const x = i * 45 - 20;
-            const y = 30 + (i % 3) * 12;
-            const scale = 0.8 + (i % 4) * 0.15;
+      {/* ---------------- HEAVY TOP HEADER CANOPY ---------------- */}
+      <div className="absolute top-0 inset-x-0 h-[120px] pointer-events-none z-20 overflow-hidden">
+        <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 1200 120">
+          {/* Layered Leaf Clusters across header beam */}
+          {Array.from({ length: 32 }).map((_, i) => {
+            const x = i * 40 - 15;
+            const y = 10 + (i % 4) * 10;
+            const scale = 0.85 + (i % 3) * 0.2;
+            const rot = (i % 2 === 0 ? 1 : -1) * (15 + (i % 5) * 12);
             return (
-              <g key={`top-canopy-${i}`} transform={`translate(${x}, ${y}) scale(${scale})`}>
-                <path d="M 0 0 C -15 20, -25 35, 0 50 C 25 35, 15 20, 0 0 Z" fill="#1C2E20" />
-                <path d="M -15 -10 C -30 10, -35 25, -15 40 C 5 25, 0 10, -15 -10 Z" fill="#283D2A" />
-                <path d="M 15 -10 C 0 10, -5 25, 15 40 C 35 25, 30 10, 15 -10 Z" fill="#152418" />
+              <g key={`top-leaf-${i}`}>
+                <DetailedLeaf x={x} y={y + 35} scale={scale} rotate={rot} fill={i % 2 === 0 ? "#1B3022" : "#28422C"} />
+                {i % 4 === 0 && <FlowerBud x={x + 10} y={y + 25} scale={0.7} rotate={rot} />}
               </g>
             );
           })}
         </svg>
       </div>
 
-      {/* ================= FAR LEFT HEAVY WALL DRAPE ================= */}
+      {/* ================= FAR LEFT HEAVY VINE DRAPE ================= */}
       <motion.div
         style={{ rotate: springLeft, transformOrigin: "top left" }}
-        animate={{ rotate: [0, 2, -1.5, 0] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-0 left-0 w-[340px] h-[850px]"
+        className="absolute top-0 left-0 w-[360px] h-[850px]"
       >
-        <svg className="w-full h-full" viewBox="0 0 340 850" fill="none">
-          {/* Main Thick Vines */}
-          <path d="M 10 -20 C 60 180, -20 380, 80 580 C 120 680, 40 760, 65 840" stroke="#1C2E20" strokeWidth="6" strokeLinecap="round" />
-          <path d="M 25 -20 C 80 160, 10 340, 100 520 C 130 600, 70 720, 80 810" stroke="#283D2A" strokeWidth="4" strokeLinecap="round" />
-          <path d="M 5 -20 C 100 120, 50 300, 130 460 C 160 520, 30 620, 45 720" stroke="#152418" strokeWidth="3" strokeLinecap="round" />
+        <svg className="w-full h-full" viewBox="0 0 360 850" fill="none">
+          {/* Main Thick Branch Stems */}
+          <path d="M 10 -10 Q 70 200, 20 400 T 90 750 T 60 840" stroke="#1B3022" strokeWidth="8" strokeLinecap="round" />
+          <path d="M 30 -10 Q 90 180, 40 380 T 110 710" stroke="#2A4230" strokeWidth="5" strokeLinecap="round" />
+          <path d="M 50 -10 Q 120 150, 70 320 T 130 600" stroke="#142318" strokeWidth="3" strokeLinecap="round" />
 
-          {/* Dense Foliage Clusters along Main Left Drape */}
-          <LeafCluster x={20} y={40} scale={1.3} rotate={-15} color="#1C2E20" delay={0.1} />
-          <LeafCluster x={50} y={110} scale={1.4} rotate={35} color="#283D2A" delay={0.3} />
-          <LeafCluster x={35} y={180} scale={1.2} rotate={-30} color="#152418" delay={0.5} />
-          <LeafCluster x={25} y={260} scale={1.5} rotate={20} color="#1C2E20" delay={0.2} />
-          <LeafCluster x={45} y={350} scale={1.3} rotate={-40} color="#283D2A" delay={0.4} />
-          <LeafCluster x={75} y={440} scale={1.4} rotate={30} color="#1C2E20" delay={0.6} />
-          <LeafCluster x={105} y={530} scale={1.3} rotate={-20} color="#152418" delay={0.2} />
-          <LeafCluster x={85} y={630} scale={1.2} rotate={25} color="#283D2A" delay={0.5} />
-          <LeafCluster x={55} y={720} scale={1.1} rotate={-15} color="#1C2E20" delay={0.3} />
-          <LeafCluster x={65} y={810} scale={0.9} rotate={10} color="#283D2A" delay={0.1} />
+          {/* DENSE LEAF PAIRS & FLOWERS ALONG VINE */}
+          {/* Top Cluster */}
+          <DetailedLeaf x={30} y={60} scale={1.3} rotate={-40} fill="#1B3022" delay={0.1} />
+          <DetailedLeaf x={45} y={80} scale={1.2} rotate={50} fill="#2A4230" delay={0.3} />
+          <FlowerBud x={25} y={100} scale={1.1} rotate={-20} />
 
-          {/* Inner Branch Tendril Clutter */}
-          <LeafCluster x={80} y={150} scale={1.1} rotate={50} color="#1C2E20" delay={0.7} />
-          <LeafCluster x={110} y={320} scale={1.2} rotate={-45} color="#283D2A" delay={0.4} />
-          <LeafCluster x={140} y={480} scale={1.0} rotate={35} color="#152418" delay={0.8} />
+          {/* Upper Middle */}
+          <DetailedLeaf x={55} y={160} scale={1.4} rotate={-30} fill="#1B3022" delay={0.2} />
+          <DetailedLeaf x={75} y={190} scale={1.3} rotate={60} fill="#2A4230" delay={0.5} />
+          <DetailedLeaf x={40} y={230} scale={1.5} rotate={-55} fill="#142318" delay={0.4} />
+
+          {/* Center Dense Section */}
+          <DetailedLeaf x={25} y={310} scale={1.4} rotate={35} fill="#1B3022" delay={0.6} />
+          <DetailedLeaf x={45} y={340} scale={1.3} rotate={-45} fill="#2A4230" delay={0.1} />
+          <FlowerBud x={30} y={370} scale={1.2} rotate={15} />
+
+          <DetailedLeaf x={60} y={430} scale={1.5} rotate={50} fill="#1B3022" delay={0.3} />
+          <DetailedLeaf x={85} y={470} scale={1.3} rotate={-35} fill="#142318" delay={0.7} />
+          <DetailedLeaf x={105} y={520} scale={1.2} rotate={40} fill="#2A4230" delay={0.2} />
+
+          {/* Lower Tail */}
+          <DetailedLeaf x={90} y={610} scale={1.3} rotate={-50} fill="#1B3022" delay={0.5} />
+          <DetailedLeaf x={100} y={660} scale={1.2} rotate={30} fill="#2A4230" delay={0.3} />
+          <FlowerBud x={85} y={700} scale={1} rotate={-10} />
+          <DetailedLeaf x={75} y={760} scale={1.1} rotate={-30} fill="#142318" delay={0.4} />
+          <DetailedLeaf x={60} y={820} scale={0.9} rotate={15} fill="#1B3022" delay={0.2} />
         </svg>
       </motion.div>
 
-      {/* ================= MID-LEFT DRAPING TENDRILS ================= */}
+      {/* ================= MID-LEFT TENDRIL ================= */}
       <motion.div
         style={{ rotate: springLeft, transformOrigin: "top center" }}
-        animate={{ rotate: [0, -1.8, 1.8, 0] }}
-        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
-        className="absolute top-0 left-[22%] w-[260px] h-[620px] hidden sm:block"
+        className="absolute top-0 left-[20%] w-[240px] h-[600px] hidden sm:block"
       >
-        <svg className="w-full h-full" viewBox="0 0 260 620" fill="none">
-          <path d="M 130 -20 C 190 140, 90 300, 150 460 C 175 530, 130 580, 140 610" stroke="#1C2E20" strokeWidth="4" strokeLinecap="round" />
-          <path d="M 140 -20 C 170 100, 120 240, 175 380" stroke="#283D2A" strokeWidth="2.5" strokeLinecap="round" />
+        <svg className="w-full h-full" viewBox="0 0 240 600" fill="none">
+          <path d="M 120 -10 Q 170 150, 110 320 T 150 580" stroke="#1B3022" strokeWidth="5" strokeLinecap="round" />
+          <path d="M 130 -10 Q 150 120, 125 260" stroke="#2A4230" strokeWidth="3" strokeLinecap="round" />
 
-          <LeafCluster x={140} y={60} scale={1.2} rotate={15} color="#1C2E20" delay={0.2} />
-          <LeafCluster x={165} y={150} scale={1.3} rotate={-35} color="#283D2A" delay={0.5} />
-          <LeafCluster x={125} y={250} scale={1.2} rotate={30} color="#152418" delay={0.3} />
-          <LeafCluster x={145} y={350} scale={1.3} rotate={-25} color="#1C2E20" delay={0.6} />
-          <LeafCluster x={165} y={450} scale={1.1} rotate={40} color="#283D2A" delay={0.1} />
-          <LeafCluster x={140} y={550} scale={0.9} rotate={-10} color="#1C2E20" delay={0.4} />
+          <DetailedLeaf x={135} y={70} scale={1.2} rotate={30} fill="#1B3022" delay={0.2} />
+          <DetailedLeaf x={155} y={140} scale={1.3} rotate={-40} fill="#2A4230" delay={0.5} />
+          <FlowerBud x={140} y={200} scale={0.9} rotate={20} />
+
+          <DetailedLeaf x={115} y={270} scale={1.4} rotate={45} fill="#142318" delay={0.3} />
+          <DetailedLeaf x={130} y={350} scale={1.2} rotate={-35} fill="#1B3022" delay={0.6} />
+          <DetailedLeaf x={145} y={440} scale={1.1} rotate={25} fill="#2A4230" delay={0.1} />
+          <DetailedLeaf x={150} y={540} scale={0.9} rotate={-15} fill="#1B3022" delay={0.4} />
         </svg>
       </motion.div>
 
-      {/* ================= MID-RIGHT DRAPING TENDRILS ================= */}
+      {/* ================= MID-RIGHT TENDRIL ================= */}
       <motion.div
         style={{ rotate: springRight, transformOrigin: "top center" }}
-        animate={{ rotate: [0, 1.8, -1.8, 0] }}
-        transition={{ duration: 8.5, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
-        className="absolute top-0 right-[22%] w-[260px] h-[640px] hidden sm:block"
+        className="absolute top-0 right-[20%] w-[240px] h-[620px] hidden sm:block"
       >
-        <svg className="w-full h-full" viewBox="0 0 260 640" fill="none">
-          <path d="M 130 -20 C 70 150, 170 310, 105 480 C 85 550, 120 600, 115 630" stroke="#1C2E20" strokeWidth="4" strokeLinecap="round" />
-          <path d="M 120 -20 C 85 110, 140 250, 85 390" stroke="#283D2A" strokeWidth="2.5" strokeLinecap="round" />
+        <svg className="w-full h-full" viewBox="0 0 240 620" fill="none">
+          <path d="M 120 -10 Q 70 160, 130 330 T 90 600" stroke="#1B3022" strokeWidth="5" strokeLinecap="round" />
+          <path d="M 110 -10 Q 85 130, 115 270" stroke="#2A4230" strokeWidth="3" strokeLinecap="round" />
 
-          <LeafCluster x={115} y={70} scale={1.2} rotate={-20} color="#1C2E20" delay={0.4} />
-          <LeafCluster x={90} y={160} scale={1.3} rotate={30} color="#283D2A" delay={0.1} />
-          <LeafCluster x={145} y={260} scale={1.2} rotate={-40} color="#152418" delay={0.7} />
-          <LeafCluster x={115} y={370} scale={1.3} rotate={25} color="#1C2E20" delay={0.3} />
-          <LeafCluster x={95} y={480} scale={1.1} rotate={-15} color="#283D2A" delay={0.5} />
-          <LeafCluster x={115} y={580} scale={0.9} rotate={20} color="#1C2E20" delay={0.2} />
+          <DetailedLeaf x={105} y={80} scale={1.2} rotate={-30} fill="#1B3022" delay={0.4} />
+          <DetailedLeaf x={85} y={150} scale={1.3} rotate={40} fill="#2A4230" delay={0.1} />
+          <FlowerBud x={100} y={210} scale={0.9} rotate={-20} />
+
+          <DetailedLeaf x={125} y={280} scale={1.4} rotate={-45} fill="#142318" delay={0.7} />
+          <DetailedLeaf x={110} y={360} scale={1.2} rotate={35} fill="#1B3022" delay={0.3} />
+          <DetailedLeaf x={95} y={450} scale={1.1} rotate={-25} fill="#2A4230" delay={0.5} />
+          <DetailedLeaf x={90} y={560} scale={0.9} rotate={15} fill="#1B3022" delay={0.2} />
         </svg>
       </motion.div>
 
-      {/* ================= FAR RIGHT HEAVY WALL DRAPE ================= */}
+      {/* ================= FAR RIGHT HEAVY VINE DRAPE ================= */}
       <motion.div
         style={{ rotate: springRight, transformOrigin: "top right" }}
-        animate={{ rotate: [0, -2, 1.5, 0] }}
-        transition={{ duration: 7.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
-        className="absolute top-0 right-0 w-[340px] h-[860px]"
+        className="absolute top-0 right-0 w-[360px] h-[860px]"
       >
-        <svg className="w-full h-full transform scale-x-[-1]" viewBox="0 0 340 860" fill="none">
-          {/* Main Thick Vines */}
-          <path d="M 10 -20 C 60 190, -20 390, 80 600 C 120 700, 40 780, 65 850" stroke="#1C2E20" strokeWidth="6" strokeLinecap="round" />
-          <path d="M 25 -20 C 80 170, 10 350, 100 540 C 130 620, 70 740, 80 830" stroke="#283D2A" strokeWidth="4" strokeLinecap="round" />
-          <path d="M 5 -20 C 100 130, 50 310, 130 480 C 160 540, 30 640, 45 740" stroke="#152418" strokeWidth="3" strokeLinecap="round" />
+        <svg className="w-full h-full transform scale-x-[-1]" viewBox="0 0 360 860" fill="none">
+          {/* Main Thick Branch Stems */}
+          <path d="M 10 -10 Q 70 200, 20 400 T 90 750 T 60 850" stroke="#1B3022" strokeWidth="8" strokeLinecap="round" />
+          <path d="M 30 -10 Q 90 180, 40 380 T 110 720" stroke="#2A4230" strokeWidth="5" strokeLinecap="round" />
+          <path d="M 50 -10 Q 120 150, 70 320 T 130 610" stroke="#142318" strokeWidth="3" strokeLinecap="round" />
 
-          {/* Dense Foliage Clusters along Main Right Drape */}
-          <LeafCluster x={20} y={45} scale={1.3} rotate={-15} color="#1C2E20" delay={0.2} />
-          <LeafCluster x={50} y={120} scale={1.4} rotate={35} color="#283D2A" delay={0.4} />
-          <LeafCluster x={35} y={190} scale={1.2} rotate={-30} color="#152418" delay={0.1} />
-          <LeafCluster x={25} y={270} scale={1.5} rotate={20} color="#1C2E20" delay={0.5} />
-          <LeafCluster x={45} y={360} scale={1.3} rotate={-40} color="#283D2A" delay={0.3} />
-          <LeafCluster x={75} y={450} scale={1.4} rotate={30} color="#1C2E20" delay={0.7} />
-          <LeafCluster x={105} y={550} scale={1.3} rotate={-20} color="#152418" delay={0.2} />
-          <LeafCluster x={85} y={650} scale={1.2} rotate={25} color="#283D2A" delay={0.6} />
-          <LeafCluster x={55} y={740} scale={1.1} rotate={-15} color="#1C2E20" delay={0.4} />
-          <LeafCluster x={65} y={830} scale={0.9} rotate={10} color="#283D2A" delay={0.1} />
+          {/* DENSE LEAF PAIRS & FLOWERS ALONG VINE */}
+          <DetailedLeaf x={30} y={65} scale={1.3} rotate={-40} fill="#1B3022" delay={0.2} />
+          <DetailedLeaf x={45} y={85} scale={1.2} rotate={50} fill="#2A4230" delay={0.4} />
+          <FlowerBud x={25} y={105} scale={1.1} rotate={-20} />
 
-          {/* Inner Branch Tendril Clutter */}
-          <LeafCluster x={80} y={160} scale={1.1} rotate={50} color="#1C2E20" delay={0.3} />
-          <LeafCluster x={110} y={340} scale={1.2} rotate={-45} color="#283D2A" delay={0.6} />
-          <LeafCluster x={140} y={500} scale={1.0} rotate={35} color="#152418" delay={0.2} />
+          <DetailedLeaf x={55} y={165} scale={1.4} rotate={-30} fill="#1B3022" delay={0.3} />
+          <DetailedLeaf x={75} y={195} scale={1.3} rotate={60} fill="#2A4230" delay={0.6} />
+          <DetailedLeaf x={40} y={235} scale={1.5} rotate={-55} fill="#142318" delay={0.1} />
+
+          <DetailedLeaf x={25} y={315} scale={1.4} rotate={35} fill="#1B3022" delay={0.5} />
+          <DetailedLeaf x={45} y={345} scale={1.3} rotate={-45} fill="#2A4230" delay={0.3} />
+          <FlowerBud x={30} y={375} scale={1.2} rotate={15} />
+
+          <DetailedLeaf x={60} y={435} scale={1.5} rotate={50} fill="#1B3022" delay={0.7} />
+          <DetailedLeaf x={85} y={475} scale={1.3} rotate={-35} fill="#142318" delay={0.2} />
+          <DetailedLeaf x={105} y={525} scale={1.2} rotate={40} fill="#2A4230" delay={0.6} />
+
+          <DetailedLeaf x={90} y={615} scale={1.3} rotate={-50} fill="#1B3022" delay={0.4} />
+          <DetailedLeaf x={100} y={665} scale={1.2} rotate={30} fill="#2A4230" delay={0.1} />
+          <FlowerBud x={85} y={705} scale={1} rotate={-10} />
+          <DetailedLeaf x={75} y={765} scale={1.1} rotate={-30} fill="#142318" delay={0.3} />
+          <DetailedLeaf x={60} y={825} scale={0.9} rotate={15} fill="#1B3022" delay={0.5} />
         </svg>
       </motion.div>
     </div>
@@ -324,9 +255,6 @@ export default function App() {
 
   return (
     <div className="relative bg-[#EFF4EC] text-[#273229] min-h-screen antialiased overflow-x-hidden font-['Plus_Jakarta_Sans',sans-serif]">
-      <BotanicalAtmosphere />
-      <CoolGlow />
-
       <motion.div
         style={{ y: bgY }}
         className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(194,214,188,0.4),rgba(239,244,236,0.95))] z-0 pointer-events-none"
@@ -379,7 +307,7 @@ export default function App() {
   );
 }
 
-/* ---------------- ELEGANT UNICODE DIVIDER ---------------- */
+/* ---------------- ELEGANT FLORAL DIVIDER ---------------- */
 
 function FloralDivider() {
   return (
