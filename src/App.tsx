@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { FaDiscord, FaBook, FaCalendarAlt, FaBullhorn, FaShieldAlt } from "react-icons/fa";
 import { motion, useScroll, useTransform } from "framer-motion";
 import type { Variants } from "framer-motion";
@@ -343,7 +343,6 @@ function GuildRulesSection() {
       </div>
 
       <div className="p-8 md:p-10 rounded-3xl bg-white border border-[#A6C49F] shadow-lg relative overflow-hidden">
-        {/* Subtle Unicode Corner Accents */}
         <div className="absolute top-3 left-3 text-[#1C2E20]/30 text-xs">✦</div>
         <div className="absolute top-3 right-3 text-[#1C2E20]/30 text-xs">✦</div>
         <div className="absolute bottom-3 left-3 text-[#1C2E20]/30 text-xs">✦</div>
@@ -541,7 +540,7 @@ function JoinSection() {
         </p>
         <div className="flex justify-center">
           <a
-            href="https://discord.gg"
+            href="https://discord.gg/kZyJTWdxxD"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-3 px-8 py-3.5 rounded-2xl bg-[#1C2E20] text-[#EFF4EC] text-xs font-bold tracking-widest uppercase hover:bg-[#122015] transition shadow-md"
