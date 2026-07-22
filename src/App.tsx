@@ -132,7 +132,7 @@ function FallingPetalsCanvas() {
         ctx.translate(p.x, p.y);
         ctx.rotate((p.rotation * Math.PI) / 180);
         ctx.globalAlpha = p.opacity;
-        ctx.fillStyle = "#9CD870"; // Matched to new vines
+        ctx.fillStyle = "#9CD870";
 
         ctx.beginPath();
         ctx.ellipse(0, 0, p.size, p.size * 0.5, 0, 0, Math.PI * 2);
@@ -157,7 +157,7 @@ function FallingPetalsCanvas() {
   return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-30" />;
 }
 
-/* ---------------- STYLIZED VINES OVERLAY WITH PHYSICS ---------------- */
+/* ---------------- DELICATE STYLIZED VINES OVERLAY ---------------- */
 
 interface LeafData {
   x: number;
@@ -200,20 +200,21 @@ function StylizedVineOverlay() {
   const scrollVelocity = useVelocity(scrollY);
 
   // Physics Springs reacting to scroll speed
-  const bounceY = useSpring(useTransform(scrollVelocity, [-1500, 1500], [-35, 35]), { stiffness: 40, damping: 10 });
-  const swingL = useSpring(useTransform(scrollVelocity, [-1500, 1500], [10, -10]), { stiffness: 40, damping: 10 });
-  const swingR = useSpring(useTransform(scrollVelocity, [-1500, 1500], [-10, 10]), { stiffness: 40, damping: 10 });
+  const bounceY = useSpring(useTransform(scrollVelocity, [-1500, 1500], [-30, 30]), { stiffness: 40, damping: 10 });
+  const swingL = useSpring(useTransform(scrollVelocity, [-1500, 1500], [8, -8]), { stiffness: 40, damping: 10 });
+  const swingR = useSpring(useTransform(scrollVelocity, [-1500, 1500], [-8, 8]), { stiffness: 40, damping: 10 });
 
-  // Generate static vine geometry once to prevent re-renders breaking SVG structure
+  // Generated static vine geometry with SHALLOW dips and SMALLER scale 
+  // to perfectly frame the site without obscuring content.
   const vines = useMemo(() => ({
-    top1: generateVine(-50, -50, 300, 350, 650, -50, 15, 0.9),
-    top2: generateVine(150, -50, 500, 480, 950, -50, 17, 1),
-    top3: generateVine(450, -50, 800, 420, 1250, -50, 16, 0.95),
-    top4: generateVine(850, -50, 1100, 250, 1350, -50, 12, 0.8),
-    hangL1: generateVine(40, -50, 10, 400, 60, 900, 16, 1),
-    hangL2: generateVine(150, -50, 100, 200, 130, 500, 9, 0.85),
-    hangR1: generateVine(1150, -50, 1180, 400, 1130, 900, 16, 1),
-    hangR2: generateVine(1050, -50, 1100, 200, 1070, 500, 9, 0.85),
+    top1: generateVine(-50, -50, 250, 120, 550, -50, 22, 0.45),
+    top2: generateVine(150, -50, 500, 180, 850, -50, 28, 0.5),
+    top3: generateVine(450, -50, 750, 140, 1050, -50, 24, 0.45),
+    top4: generateVine(800, -50, 1050, 100, 1300, -50, 18, 0.4),
+    hangL1: generateVine(30, -50, 0, 300, 20, 800, 28, 0.5),
+    hangL2: generateVine(80, -50, 40, 150, 60, 450, 16, 0.4),
+    hangR1: generateVine(1170, -50, 1200, 300, 1180, 800, 28, 0.5),
+    hangR2: generateVine(1120, -50, 1160, 150, 1140, 450, 16, 0.4),
   }), []);
 
   // Shared leaf definition to map across all vines
@@ -227,9 +228,9 @@ function StylizedVineOverlay() {
     </g>
   );
 
-  const renderVineGroup = (data: VineData) => (
+  const renderVineGroup = (data: VineData, thickness = 2.5) => (
     <>
-      <path d={data.path} stroke="#111" strokeWidth="4.5" fill="none" strokeLinecap="round" />
+      <path d={data.path} stroke="#111" strokeWidth={thickness} fill="none" strokeLinecap="round" />
       {data.leaves.map((l, i) => (
         <use key={i} href="#stylized-leaf" transform={`translate(${l.x} ${l.y}) rotate(${l.angle}) scale(${l.scale})`} />
       ))}
@@ -242,28 +243,27 @@ function StylizedVineOverlay() {
         <defs>{LeafShape}</defs>
 
         {/* TOP SWOOPING CANOPY (Bounces up and down on scroll) */}
-        <motion.g style={{ y: bounceY }} animate={{ y: [0, 10, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
+        <motion.g style={{ y: bounceY }} animate={{ y: [0, 8, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
           {renderVineGroup(vines.top1)}
           {renderVineGroup(vines.top3)}
           {renderVineGroup(vines.top4)}
-          {/* Top2 is the lowest middle swoop, give it a slight delay in its idle sway */}
-          <motion.g animate={{ y: [0, 8, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}>
+          <motion.g animate={{ y: [0, 6, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}>
             {renderVineGroup(vines.top2)}
           </motion.g>
         </motion.g>
 
         {/* LEFT HANGING VINES (Swings left/right on scroll) */}
-        <motion.g style={{ rotate: swingL, transformOrigin: "40px 0px" }} animate={{ rotate: [0, 2, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}>
+        <motion.g style={{ rotate: swingL, transformOrigin: "30px 0px" }} animate={{ rotate: [0, 1.5, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}>
           {renderVineGroup(vines.hangL1)}
-          <motion.g animate={{ rotate: [0, -1.5, 0] }} transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }} style={{ transformOrigin: "150px 0px" }}>
+          <motion.g animate={{ rotate: [0, -1, 0] }} transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }} style={{ transformOrigin: "80px 0px" }}>
             {renderVineGroup(vines.hangL2)}
           </motion.g>
         </motion.g>
 
         {/* RIGHT HANGING VINES (Swings left/right on scroll) */}
-        <motion.g style={{ rotate: swingR, transformOrigin: "1150px 0px" }} animate={{ rotate: [0, -2, 0] }} transition={{ duration: 7.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}>
+        <motion.g style={{ rotate: swingR, transformOrigin: "1170px 0px" }} animate={{ rotate: [0, -1.5, 0] }} transition={{ duration: 7.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}>
           {renderVineGroup(vines.hangR1)}
-          <motion.g animate={{ rotate: [0, 1.5, 0] }} transition={{ duration: 6.8, repeat: Infinity, ease: "easeInOut", delay: 0.7 }} style={{ transformOrigin: "1050px 0px" }}>
+          <motion.g animate={{ rotate: [0, 1, 0] }} transition={{ duration: 6.8, repeat: Infinity, ease: "easeInOut", delay: 0.7 }} style={{ transformOrigin: "1120px 0px" }}>
             {renderVineGroup(vines.hangR2)}
           </motion.g>
         </motion.g>
@@ -288,7 +288,7 @@ export default function App() {
 
   return (
     <div className="relative bg-[#EFF4EC] text-[#273229] min-h-screen antialiased overflow-x-hidden font-['Plus_Jakarta_Sans',sans-serif]">
-      {/* 1. Exact stylised vines from screenshot with heavy physics */}
+      {/* 1. Scaled, delicate vines overlay */}
       <StylizedVineOverlay />
       
       {/* 2. Soft background gradient shift */}
