@@ -118,19 +118,23 @@ function CoolGlow() {
 
 /* ---------------- ORGANIC DRAPED VINES WITH LEAF PHYSICS ---------------- */
 
-// Sub-component for individual leafy branches with physics-driven leaf flutter
+interface LeafNode {
+  cx: number;
+  cy: number;
+  r: number;
+  rot: number;
+}
+
 function PhysicsLeafBranch({
   d,
   leaves,
   strokeWidth = 2.5,
   color = "#1C2E20",
-  scrollSpring,
 }: {
   d: string;
-  leaves: Array<{ cx: number; cy: number; r: number; rot: number }>;
+  leaves: LeafNode[];
   strokeWidth?: number;
   color?: string;
-  scrollSpring: any;
 }) {
   return (
     <g>
@@ -181,9 +185,8 @@ function OrganicHangingVines() {
 
   return (
     <div className="pointer-events-none absolute top-full inset-x-0 h-[850px] z-10 overflow-visible">
-      {/* ---------------- TOP HORIZONTAL DENSE CANOPY (BEAM OVERHANG) ---------------- */}
+      {/* TOP HORIZONTAL CANOPY */}
       <div className="absolute top-0 inset-x-0 h-[80px] bg-gradient-to-b from-[#1C2E20]/20 to-transparent flex justify-between overflow-hidden">
-        {/* Dense horizontal leaf clutter along navbar border */}
         <div className="w-full h-full opacity-80 flex justify-between items-start text-[#1C2E20] text-2xl tracking-tighter select-none font-serif">
           <span>❦🌿❦🌿❦🌿</span>
           <span>🌿❦🌿❦🌿❦</span>
@@ -192,7 +195,7 @@ function OrganicHangingVines() {
         </div>
       </div>
 
-      {/* ================= FAR LEFT EXTRA-LONG HEAVY DRAPE (LIKE PHOTO) ================= */}
+      {/* FAR LEFT EXTRA-LONG HEAVY DRAPE */}
       <motion.div
         style={{ rotate: springLeft, transformOrigin: "top left" }}
         animate={{ rotate: [0, 2.5, -1.8, 0], skewX: [0, 1, -1, 0] }}
@@ -200,12 +203,10 @@ function OrganicHangingVines() {
         className="absolute top-0 left-0 w-[320px] h-[820px] opacity-95"
       >
         <svg className="w-full h-full" viewBox="0 0 320 820" fill="none">
-          {/* Deep Wall Drape - Outer Stem */}
           <PhysicsLeafBranch
             d="M 10 0 C 40 180, -10 380, 65 580 C 100 680, 30 750, 50 810"
             strokeWidth={3.5}
             color="#1C2E20"
-            scrollSpring={springLeft}
             leaves={[
               { cx: 18, cy: 50, r: 12, rot: -20 },
               { cx: 28, cy: 120, r: 14, rot: 35 },
@@ -218,12 +219,10 @@ function OrganicHangingVines() {
               { cx: 52, cy: 790, r: 9, rot: -10 },
             ]}
           />
-          {/* Secondary Wild Tendril (Loops inward like real vine in photo) */}
           <PhysicsLeafBranch
             d="M 10 0 C 80 140, 40 290, 110 440 C 140 500, 20 580, 35 670"
             strokeWidth={2}
             color="#273229"
-            scrollSpring={springLeft}
             leaves={[
               { cx: 45, cy: 80, r: 11, rot: 50 },
               { cx: 68, cy: 180, r: 12, rot: -25 },
@@ -237,7 +236,7 @@ function OrganicHangingVines() {
         </svg>
       </motion.div>
 
-      {/* ================= MID-LEFT DRAPING BRANCHES ================= */}
+      {/* MID-LEFT DRAPING BRANCHES */}
       <motion.div
         style={{ rotate: springLeft, transformOrigin: "top center" }}
         animate={{ rotate: [0, -2, 2.2, 0] }}
@@ -249,7 +248,6 @@ function OrganicHangingVines() {
             d="M 120 0 C 170 120, 90 260, 140 420 C 160 490, 125 540, 135 570"
             strokeWidth={2.4}
             color="#1C2E20"
-            scrollSpring={springLeft}
             leaves={[
               { cx: 135, cy: 60, r: 11, rot: 15 },
               { cx: 140, cy: 150, r: 13, rot: -40 },
@@ -262,7 +260,7 @@ function OrganicHangingVines() {
         </svg>
       </motion.div>
 
-      {/* ================= MID-RIGHT DELICATE DRAPE ================= */}
+      {/* MID-RIGHT DELICATE DRAPE */}
       <motion.div
         style={{ rotate: springRight, transformOrigin: "top center" }}
         animate={{ rotate: [0, 2.2, -2, 0] }}
@@ -274,7 +272,6 @@ function OrganicHangingVines() {
             d="M 120 0 C 70 130, 150 280, 95 440 C 75 510, 110 570, 105 610"
             strokeWidth={2.4}
             color="#1C2E20"
-            scrollSpring={springRight}
             leaves={[
               { cx: 100, cy: 70, r: 11, rot: -30 },
               { cx: 105, cy: 170, r: 13, rot: 25 },
@@ -287,7 +284,7 @@ function OrganicHangingVines() {
         </svg>
       </motion.div>
 
-      {/* ================= FAR RIGHT EXTRA-LONG HEAVY DRAPE (LIKE PHOTO) ================= */}
+      {/* FAR RIGHT EXTRA-LONG HEAVY DRAPE */}
       <motion.div
         style={{ rotate: springRight, transformOrigin: "top right" }}
         animate={{ rotate: [0, -2.8, 2, 0], skewX: [0, -1, 1, 0] }}
@@ -295,12 +292,10 @@ function OrganicHangingVines() {
         className="absolute top-0 right-0 w-[320px] h-[840px] opacity-95"
       >
         <svg className="w-full h-full transform scale-x-[-1]" viewBox="0 0 320 840" fill="none">
-          {/* Deep Wall Drape - Outer Stem */}
           <PhysicsLeafBranch
             d="M 10 0 C 40 190, -10 390, 65 600 C 100 700, 30 770, 50 830"
             strokeWidth={3.5}
             color="#1C2E20"
-            scrollSpring={springRight}
             leaves={[
               { cx: 18, cy: 55, r: 12, rot: -20 },
               { cx: 28, cy: 130, r: 14, rot: 35 },
@@ -313,12 +308,10 @@ function OrganicHangingVines() {
               { cx: 52, cy: 810, r: 9, rot: -10 },
             ]}
           />
-          {/* Secondary Wild Tendril */}
           <PhysicsLeafBranch
             d="M 10 0 C 80 150, 40 300, 110 460 C 140 520, 20 600, 35 690"
             strokeWidth={2}
             color="#273229"
-            scrollSpring={springRight}
             leaves={[
               { cx: 45, cy: 85, r: 11, rot: 50 },
               { cx: 68, cy: 190, r: 12, rot: -25 },
@@ -359,7 +352,6 @@ export default function App() {
         className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(194,214,188,0.4),rgba(239,244,236,0.95))] z-0 pointer-events-none"
       />
 
-      {/* STICKY TOP NAVBAR */}
       <Navbar />
 
       <ScrollFocusSection>
@@ -368,42 +360,36 @@ export default function App() {
 
       <FloralDivider />
 
-      {/* 1. ANNOUNCEMENTS / NEWS */}
       <ScrollFocusSection id="announcements">
         <Announcements />
       </ScrollFocusSection>
 
       <FloralDivider />
 
-      {/* 2. GUIDELINES (ALL 9 OFFICIAL RULES) */}
       <ScrollFocusSection id="rules">
         <GuildRulesSection />
       </ScrollFocusSection>
 
       <FloralDivider />
 
-      {/* 3. GATHERINGS / EVENTS */}
       <ScrollFocusSection id="events">
         <EventsCalendar />
       </ScrollFocusSection>
 
       <FloralDivider />
 
-      {/* 4. FIELD GUIDES / WIKI */}
       <ScrollFocusSection id="wiki">
         <WikiSection />
       </ScrollFocusSection>
 
       <FloralDivider />
 
-      {/* 5. GUARDIANS / ROSTER */}
       <ScrollFocusSection id="roster">
         <Roster />
       </ScrollFocusSection>
 
       <FloralDivider />
 
-      {/* 6. JOIN */}
       <ScrollFocusSection id="join">
         <JoinSection />
       </ScrollFocusSection>
@@ -463,7 +449,6 @@ function Navbar() {
         </div>
       </div>
 
-      {/* VINES ATTACHED TO THE BOTTOM OF THIS STICKY NAVBAR */}
       <OrganicHangingVines />
     </header>
   );
@@ -563,7 +548,7 @@ function Announcements() {
               </span>
               <span className="text-xs text-[#526354] font-semibold">{item.date}</span>
             </div>
-            <h3 className="text-lg font-[#Cinzel',serif] mb-2 text-[#1C2E20] font-bold tracking-wide">{item.title}</h3>
+            <h3 className="text-lg font-['Cinzel',serif] mb-2 text-[#1C2E20] font-bold tracking-wide">{item.title}</h3>
             <p className="text-[#3A483C] text-xs leading-relaxed font-medium">{item.summary}</p>
           </div>
         ))}
@@ -572,7 +557,7 @@ function Announcements() {
   );
 }
 
-/* ---------------- GUIDELINES (ALL 9 OFFICIAL RULES) ---------------- */
+/* ---------------- GUIDELINES ---------------- */
 
 const officialRules = [
   {
@@ -790,7 +775,7 @@ function JoinSection() {
         <h2 className="text-3xl md:text-4xl font-['Cinzel',serif] text-[#1C2E20] tracking-wider uppercase mb-3 font-bold">
           Find Your Place in Eve
         </h2>
-        <p className="font-['Cormorant_Garamond',serif] italic text-xl text-[#1C2E20] mb-6 font-bold">
+        <p className="font-[#Cormorant_Garamond',serif] italic text-xl text-[#1C2E20] mb-6 font-bold">
           "We Welcome All"
         </p>
         <p className="text-[#3A483C] text-xs md:text-sm mb-8 max-w-md mx-auto leading-relaxed font-medium">
