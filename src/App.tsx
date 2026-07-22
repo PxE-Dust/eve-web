@@ -169,7 +169,7 @@ function FallingPetalsCanvas() {
   );
 }
 
-/* ---------------- VINE CANOPY LOOP OVERLAY (ORGANIC & PHYSICS-BASED) ---------------- */
+/* ---------------- VINE CANOPY LOOP OVERLAY (GARLAND STYLE) ---------------- */
 
 function VineCanopyOverlay() {
   const { scrollY } = useScroll();
@@ -181,26 +181,24 @@ function VineCanopyOverlay() {
   // Standard Heart/Ivy leaf shape path definition
   const leafPath = "M0,15 A5,5 0 0,1 10,15 L0,25 A5,5 0 0,1 -10,15 Z";
 
-  // Anchor points at the top of the viewport
+  // Anchor points at the top of the viewport (wider spread)
   const anchors = [
-    { x: -50, y: 0 },
-    { x: 150, y: -20 },
-    { x: 300, y: 0 },
-    { x: 450, y: -20 },
-    { x: 600, y: 0 },
-    { x: 750, y: -20 },
-    { x: 900, y: 0 },
+    { x: -50, y: -10 },
+    { x: 150, y: -10 },
+    { x: 350, y: -10 },
+    { x: 550, y: -10 },
+    { x: 800, y: -10 },
+    { x: 1050, y: -10 },
   ];
 
-  // Sagging loop paths that span across the center column
+  // Sagging loop paths that span across the center column simulating pinned garlands
   const strands = [
     { d: anchors[0].x + "," + anchors[0].y + " Q midX lowY " + anchors[2].x + "," + anchors[2].y, stagger: 0 },
     { d: anchors[1].x + "," + anchors[1].y + " Q midX lowY " + anchors[3].x + "," + anchors[3].y, stagger: 100 },
     { d: anchors[2].x + "," + anchors[2].y + " Q midX lowY " + anchors[4].x + "," + anchors[4].y, stagger: 200 },
     { d: anchors[3].x + "," + anchors[3].y + " Q midX lowY " + anchors[5].x + "," + anchors[5].y, stagger: 300 },
-    { d: anchors[4].x + "," + anchors[4].y + " Q midX lowY " + anchors[6].x + "," + anchors[6].y, stagger: 400 },
     { d: anchors[0].x + "," + anchors[0].y + " Q midX lowY " + anchors[1].x + "," + anchors[1].y, stagger: 50 },
-    { d: anchors[5].x + "," + anchors[5].y + " Q midX lowY " + anchors[6].x + "," + anchors[6].y, stagger: 350 },
+    { d: anchors[4].x + "," + anchors[4].y + " Q midX lowY " + anchors[5].x + "," + anchors[5].y, stagger: 350 },
   ];
 
   const midXOffset = useTransform(scrollY, [0, 800], [10, -10]);
@@ -213,14 +211,14 @@ function VineCanopyOverlay() {
     const Ax = parseFloat(A[0]);
     const Bx = parseFloat(B[0]);
 
-    // midX: Centered between anchors, with a slight drift drift drift on scroll
+    // midX: Centered between anchors, with a slight drift on scroll
     const midXCalc = (Ax + Bx) / 2 + midXOffset.get() + Math.random() * 20 - 10;
     // lowY: Drifts lower (more sag) with scroll velocity, with an organic idle drape
-    const lowYBase = Ax > 100 && Ax < 800 ? 150 : 80;
+    const lowYBase = Ax > 100 && Ax < 800 ? 160 : 100;
     const lowYCalc = lowYBase + springSag.get() * (Bx - Ax) * 0.15 + strand.stagger * 0.1;
 
     // Point calculations along the curve to distribute foliage
-    const numFoliage = Math.max(10, Math.floor((Bx - Ax) / 25));
+    const numFoliage = Math.max(12, Math.floor((Bx - Ax) / 20));
     const foliage = [];
     for (let t = 0; t <= 1; t += 1 / numFoliage) {
       const u = 1 - t;
@@ -235,7 +233,7 @@ function VineCanopyOverlay() {
       return (ax + bx) / 2 + midXOffset.get() + Math.random() * 10 - 5;
     }
     function midPathY(ax: number, bx: number) {
-      const lyBase = ax > 100 && ax < 800 ? 150 : 80;
+      const lyBase = ax > 100 && ax < 800 ? 160 : 100;
       return lyBase + springSag.get() * (bx - ax) * 0.1 + strand.stagger * 0.1;
     }
 
@@ -244,21 +242,12 @@ function VineCanopyOverlay() {
 
   return (
     <div className="fixed inset-0 pointer-events-none z-40 overflow-hidden">
-      <svg className="absolute top-0 left-0 w-full h-screen text-[#1b3320] opacity-85" viewBox="0 0 1000 800" fill="none">
+      <svg className="absolute top-0 left-0 w-full h-screen text-[#1b3320] opacity-90" viewBox="0 0 1000 800" fill="none" preserveAspectRatio="xMidYMin slice">
         <defs>
-          <linearGradient id="canopyGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#1C2E20" stopOpacity="1" />
-            <stop offset="40%" stopColor="#2F4832" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#EFF4EC" stopOpacity="0" />
-          </linearGradient>
-          {/* Detailed Organic Leaf Shape */}
           <g id="ivyLeaf">
             <path d={leafPath} fill="currentColor" />
           </g>
         </defs>
-
-        {/* Dense Base Arch Fill */}
-        <path d="M-20,-10 L1020,-10 L1020,40 Q900,100 600,60 Q300,100 -20,40 Z" fill="url(#canopyGrad)" />
 
         {/* Dynamic Loops Strands with Organic foliage Distribution */}
         {strandsWithPhysics.map((strand, sIdx) => (
