@@ -29,8 +29,8 @@ function ScrollFocusSection({ children, id }: { children: ReactNode; id?: string
       initial={{ opacity: 0.3, filter: "blur(1px)", scale: 0.98 }}
       whileInView={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
       viewport={{ margin: "-20% 0px -20% 0px", amount: 0.3 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="transition-all duration-500 ease-out"
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      style={{ willChange: "opacity, filter, transform" }}
     >
       {children}
     </motion.div>
@@ -174,14 +174,15 @@ export default function App() {
 
       <FloralDivider />
 
-      <ScrollFocusSection id="rules">
-        <GuildRulesSection />
+      {/* Announcements placed above Rules */}
+      <ScrollFocusSection id="announcements">
+        <Announcements />
       </ScrollFocusSection>
 
       <FloralDivider />
 
-      <ScrollFocusSection id="announcements">
-        <Announcements />
+      <ScrollFocusSection id="rules">
+        <GuildRulesSection />
       </ScrollFocusSection>
 
       <FloralDivider />
@@ -245,8 +246,8 @@ function Navbar() {
 
         <div className="hidden md:flex space-x-8 text-xs tracking-widest text-[#273229] font-bold uppercase">
           {[
-            { id: "rules", label: "Guidelines" },
             { id: "announcements", label: "News" },
+            { id: "rules", label: "Guidelines" },
             { id: "events", label: "Gatherings" },
             { id: "wiki", label: "Guides" },
             { id: "roster", label: "Guardians" },
@@ -323,52 +324,6 @@ function Hero() {
   );
 }
 
-/* ---------------- GUIDELINES ---------------- */
-
-function GuildRulesSection() {
-  const rules = [
-    { title: "Warmth & Inclusivity", desc: "We are a safe, welcoming sanctuary for players of all paths, backgrounds, and experience levels." },
-    { title: "Patience & Calm", desc: "Constructive feedback over toxicity. We clear content together with patience, kindness, and good cheer." },
-    { title: "Shared Harvests", desc: "Pass along potions, gear, and wisdom from the Grove Bank to help fellow members bloom." },
-  ];
-
-  return (
-    <section className="max-w-4xl mx-auto px-6 py-6">
-      <div className="text-center mb-10">
-        <span className="text-[10px] tracking-[0.25em] text-[#1C2E20] uppercase font-bold block mb-1">
-          Sanctuary Covenant
-        </span>
-        <h2 className="text-3xl md:text-4xl font-['Cinzel',serif] text-[#1C2E20] font-bold tracking-wider uppercase">
-          Guild Guidelines
-        </h2>
-      </div>
-
-      <div className="p-8 md:p-10 rounded-3xl bg-white border border-[#A6C49F] shadow-lg relative overflow-hidden">
-        <div className="absolute top-3 left-3 text-[#1C2E20]/30 text-xs">✦</div>
-        <div className="absolute top-3 right-3 text-[#1C2E20]/30 text-xs">✦</div>
-        <div className="absolute bottom-3 left-3 text-[#1C2E20]/30 text-xs">✦</div>
-        <div className="absolute bottom-3 right-3 text-[#1C2E20]/30 text-xs">✦</div>
-
-        <div className="grid md:grid-cols-3 gap-8 relative z-10">
-          {rules.map((r, idx) => (
-            <div key={idx} className="flex flex-col p-5 rounded-2xl bg-[#F4F8F3] border border-[#D0E2CC]">
-              <span className="font-['Cinzel',serif] text-xs font-bold tracking-widest text-[#1C2E20] mb-2 flex items-center gap-1.5">
-                <span className="text-[10px]">❦</span> 0{idx + 1}.
-              </span>
-              <h3 className="font-['Cinzel',serif] text-base text-[#1C2E20] font-bold mb-2 tracking-wide">
-                {r.title}
-              </h3>
-              <p className="text-xs text-[#3A483C] leading-relaxed font-medium">
-                {r.desc}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ---------------- ANNOUNCEMENTS ---------------- */
 
 const announcementData = [
@@ -410,6 +365,52 @@ function Announcements() {
             <p className="text-[#3A483C] text-xs leading-relaxed font-medium">{item.summary}</p>
           </div>
         ))}
+      </div>
+    </section>
+  );
+}
+
+/* ---------------- GUIDELINES ---------------- */
+
+function GuildRulesSection() {
+  const rules = [
+    { title: "Warmth & Inclusivity", desc: "We are a safe, welcoming sanctuary for players of all paths, backgrounds, and experience levels." },
+    { title: "Patience & Calm", desc: "Constructive feedback over toxicity. We clear content together with patience, kindness, and good cheer." },
+    { title: "Shared Harvests", desc: "Pass along potions, gear, and wisdom from the Grove Bank to help fellow members bloom." },
+  ];
+
+  return (
+    <section className="max-w-4xl mx-auto px-6 py-6">
+      <div className="text-center mb-10">
+        <span className="text-[10px] tracking-[0.25em] text-[#1C2E20] uppercase font-bold block mb-1">
+          Sanctuary Covenant
+        </span>
+        <h2 className="text-3xl md:text-4xl font-['Cinzel',serif] text-[#1C2E20] font-bold tracking-wider uppercase">
+          Guild Guidelines
+        </h2>
+      </div>
+
+      <div className="p-8 md:p-10 rounded-3xl bg-white border border-[#A6C49F] shadow-lg relative overflow-hidden">
+        <div className="absolute top-3 left-3 text-[#1C2E20]/30 text-xs">✦</div>
+        <div className="absolute top-3 right-3 text-[#1C2E20]/30 text-xs">✦</div>
+        <div className="absolute bottom-3 left-3 text-[#1C2E20]/30 text-xs">✦</div>
+        <div className="absolute bottom-3 right-3 text-[#1C2E20]/30 text-xs">✦</div>
+
+        <div className="grid md:grid-cols-3 gap-8 relative z-10">
+          {rules.map((r, idx) => (
+            <div key={idx} className="flex flex-col p-5 rounded-2xl bg-[#F4F8F3] border border-[#D0E2CC]">
+              <span className="font-['Cinzel',serif] text-xs font-bold tracking-widest text-[#1C2E20] mb-2 flex items-center gap-1.5">
+                <span className="text-[10px]">❦</span> 0{idx + 1}.
+              </span>
+              <h3 className="font-['Cinzel',serif] text-base text-[#1C2E20] font-bold mb-2 tracking-wide">
+                {r.title}
+              </h3>
+              <p className="text-xs text-[#3A483C] leading-relaxed font-medium">
+                {r.desc}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
