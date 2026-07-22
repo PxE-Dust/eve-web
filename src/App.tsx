@@ -208,8 +208,6 @@ function VineCanopyOverlay() {
   const strandsWithPhysics = strands.map((strand) => {
     const parts = strand.d.split(" ");
     const A = parts[0].split(",");
-    const midQ = parts[1];
-    const midB = parts[2];
     const B = parts[3].split(",");
 
     const Ax = parseFloat(A[0]);
@@ -233,10 +231,10 @@ function VineCanopyOverlay() {
 
     const midPath = "M" + strand.d.replace("midX lowY", midPathX(Ax, Bx) + " " + midPathY(Ax, Bx));
 
-    function midPathX(ax, bx) {
+    function midPathX(ax: number, bx: number) {
       return (ax + bx) / 2 + midXOffset.get() + Math.random() * 10 - 5;
     }
-    function midPathY(ax, bx) {
+    function midPathY(ax: number, bx: number) {
       const lyBase = ax > 100 && ax < 800 ? 150 : 80;
       return lyBase + springSag.get() * (bx - ax) * 0.1 + strand.stagger * 0.1;
     }
@@ -251,7 +249,7 @@ function VineCanopyOverlay() {
           <linearGradient id="canopyGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#1C2E20" stopOpacity="1" />
             <stop offset="40%" stopColor="#2F4832" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="# EFF4EC" stopOpacity="0" />
+            <stop offset="100%" stopColor="#EFF4EC" stopOpacity="0" />
           </linearGradient>
           {/* Detailed Organic Leaf Shape */}
           <g id="ivyLeaf">
