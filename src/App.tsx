@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { FaDiscord, FaBook, FaCalendarAlt, FaBullhorn, FaShieldAlt } from "react-icons/fa";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -628,7 +628,7 @@ function JoinSection() {
             href="https://join.we-are-eve.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-3 px-8 py-3.5 rounded-2xl bg-[#1C2E20] text-[#EFF4EC] text-xs font-bold tracking-widest uppercase hover:bg-[#122015] transition shadow-md"
+            className="inline-flex items-center gap-3 px-8 py-3.5 rounded-2xl bg-1C2E20 text-[#EFF4EC] text-xs font-bold tracking-widest uppercase hover:bg-[#122015] transition shadow-md"
           >
             <FaDiscord className="text-base" /> Join Our Discord
           </a>
