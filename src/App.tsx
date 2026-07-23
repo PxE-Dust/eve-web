@@ -235,9 +235,11 @@ function StylizedVineOverlay() {
   const { scrollY } = useScroll();
   const scrollVelocity = useVelocity(scrollY);
 
-  const bounceY = useSpring(useTransform(scrollVelocity, [-1500, 1500], [-16, 16]), { stiffness: 42, damping: 11 });
-  const swingL = useSpring(useTransform(scrollVelocity, [-1500, 1500], [5, -5]), { stiffness: 42, damping: 11 });
-  const swingR = useSpring(useTransform(scrollVelocity, [-1500, 1500], [-5, 5]), { stiffness: 42, damping: 11 });
+  // Softer, heavier-feeling spring (lower stiffness, more damping, smaller
+  // range) so scrolling nudges the vines instead of bouncing them.
+  const bounceY = useSpring(useTransform(scrollVelocity, [-1500, 1500], [-6, 6]), { stiffness: 30, damping: 16 });
+  const swingL = useSpring(useTransform(scrollVelocity, [-1500, 1500], [2, -2]), { stiffness: 30, damping: 16 });
+  const swingR = useSpring(useTransform(scrollVelocity, [-1500, 1500], [-2, 2]), { stiffness: 30, damping: 16 });
 
   // Fuller, corner-to-corner top drape plus long hanging side vines —
   // deliberately dense now that the layer sits behind the content.
@@ -311,29 +313,49 @@ function StylizedVineOverlay() {
       <svg className="absolute top-0 left-0 w-full h-screen" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMin slice">
         <defs>{LeafDefs}</defs>
 
-        {/* TOP SWOOPING CANOPY (full corner-to-corner drape) */}
-        <motion.g style={{ y: bounceY }} animate={{ y: [0, 8, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
-          {renderVineGroup(vines.top1)}
-          {renderVineGroup(vines.top3)}
-          {renderVineGroup(vines.top4)}
-          <motion.g animate={{ y: [0, 6, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}>
-            {renderVineGroup(vines.top2)}
+        {/* TOP SWOOPING CANOPY (full corner-to-corner drape) — a slow
+            side-to-side breeze (x) layered under the softened scroll
+            bounce (y), so it's always gently moving even at rest */}
+        <motion.g
+          animate={{ x: [0, 5, 0, -5, 0] }}
+          transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <motion.g style={{ y: bounceY }} animate={{ y: [0, 3, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}>
+            {renderVineGroup(vines.top1)}
+            {renderVineGroup(vines.top3)}
+            {renderVineGroup(vines.top4)}
+            <motion.g animate={{ y: [0, 2, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}>
+              {renderVineGroup(vines.top2)}
+            </motion.g>
           </motion.g>
         </motion.g>
 
-        {/* LEFT HANGING VINES */}
-        <motion.g style={{ rotate: swingL, transformOrigin: "28px 0px" }} animate={{ rotate: [0, 1.5, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}>
-          {renderVineGroup(vines.hangL1)}
-          <motion.g animate={{ rotate: [0, -1, 0] }} transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }} style={{ transformOrigin: "75px 0px" }}>
-            {renderVineGroup(vines.hangL2, 1.8)}
+        {/* LEFT HANGING VINES — breeze wrapper (idle sway) on the outside,
+            scroll-driven swing spring nested inside so both can coexist */}
+        <motion.g
+          animate={{ rotate: [0, 2.5, 0, -2, 0] }}
+          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+          style={{ transformOrigin: "28px 0px" }}
+        >
+          <motion.g style={{ rotate: swingL, transformOrigin: "28px 0px" }}>
+            {renderVineGroup(vines.hangL1)}
+            <motion.g animate={{ rotate: [0, -1, 0] }} transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }} style={{ transformOrigin: "75px 0px" }}>
+              {renderVineGroup(vines.hangL2, 1.8)}
+            </motion.g>
           </motion.g>
         </motion.g>
 
-        {/* RIGHT HANGING VINES */}
-        <motion.g style={{ rotate: swingR, transformOrigin: "1172px 0px" }} animate={{ rotate: [0, -1.5, 0] }} transition={{ duration: 7.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}>
-          {renderVineGroup(vines.hangR1)}
-          <motion.g animate={{ rotate: [0, 1, 0] }} transition={{ duration: 6.8, repeat: Infinity, ease: "easeInOut", delay: 0.7 }} style={{ transformOrigin: "1125px 0px" }}>
-            {renderVineGroup(vines.hangR2, 1.8)}
+        {/* RIGHT HANGING VINES (mirrored breeze) */}
+        <motion.g
+          animate={{ rotate: [0, -2.5, 0, 2, 0] }}
+          transition={{ duration: 9.5, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
+          style={{ transformOrigin: "1172px 0px" }}
+        >
+          <motion.g style={{ rotate: swingR, transformOrigin: "1172px 0px" }}>
+            {renderVineGroup(vines.hangR1)}
+            <motion.g animate={{ rotate: [0, 1, 0] }} transition={{ duration: 6.8, repeat: Infinity, ease: "easeInOut", delay: 0.7 }} style={{ transformOrigin: "1125px 0px" }}>
+              {renderVineGroup(vines.hangR2, 1.8)}
+            </motion.g>
           </motion.g>
         </motion.g>
       </svg>
@@ -431,11 +453,13 @@ function FloralDivider() {
   );
 }
 
-/* ---------------- STICKY NAVBAR ---------------- */
+/* ---------------- FIXED NAVBAR ---------------- */
+/* position: fixed (not sticky) so it stays pinned to the viewport
+   exactly like the vine overlay, regardless of scroll position. */
 
 function Navbar() {
   return (
-    <header className="sticky top-0 w-full z-50 bg-[#EFF4EC]/90 backdrop-blur-md border-b border-[#1C2E20]/15 transition-all">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#EFF4EC]/90 backdrop-blur-md border-b border-[#1C2E20]/15 transition-all">
       <div className="max-w-6xl mx-auto px-8 py-4 flex justify-between items-center relative z-20">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-[#DCE7D8] border border-[#A6C49F] flex items-center justify-center text-[#1C2E20] text-xs font-serif">
@@ -476,32 +500,31 @@ function Navbar() {
 
 function Hero() {
   return (
-    <section className="pt-28 pb-12 text-center relative z-10 max-w-3xl mx-auto">
+    <section className="pt-40 pb-12 text-center relative z-10 max-w-3xl mx-auto">
       <motion.div variants={stagger} initial="hidden" animate="visible">
         <motion.div variants={fadeUp} className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full bg-white border border-[#A6C49F] text-[#1C2E20] text-[11px] font-bold tracking-[0.18em] uppercase shadow-sm">
           <span className="text-xs">✦</span> Sanctuary & Guild
         </motion.div>
 
-        <motion.p
+        {/* Frosted glass panel behind the headline group — the vines sit
+            behind the whole page, and script/serif type this size has
+            enough open counters that leaves were showing straight through */}
+        <motion.div
           variants={fadeUp}
-          className="font-['Alex_Brush',cursive] text-4xl md:text-5xl text-[#2F4832] mb-1 font-semibold"
+          className="inline-block bg-white/55 backdrop-blur-md border border-[#A6C49F]/60 rounded-[2rem] px-8 py-6 md:px-14 md:py-8 shadow-sm mb-6"
         >
-          Enjoy Your Time at
-        </motion.p>
+          <p className="font-['Alex_Brush',cursive] text-4xl md:text-5xl text-[#2F4832] mb-1 font-semibold">
+            Enjoy Your Time at
+          </p>
 
-        <motion.h1
-          variants={fadeUp}
-          className="text-6xl md:text-8xl font-['Cinzel',serif] font-bold tracking-[0.12em] text-[#1C2E20] uppercase mb-4"
-        >
-          Eve
-        </motion.h1>
+          <h1 className="text-6xl md:text-8xl font-['Cinzel',serif] font-bold tracking-[0.12em] text-[#1C2E20] uppercase mb-4">
+            Eve
+          </h1>
 
-        <motion.p
-          variants={fadeUp}
-          className="font-['Cormorant_Garamond',serif] italic text-2xl md:text-3xl text-[#1C2E20] max-w-xl mx-auto mb-6 font-bold"
-        >
-          "We Welcome All"
-        </motion.p>
+          <p className="font-['Cormorant_Garamond',serif] italic text-2xl md:text-3xl text-[#1C2E20] max-w-xl mx-auto font-bold">
+            "We Welcome All"
+          </p>
+        </motion.div>
 
         <motion.p
           variants={fadeUp}
@@ -549,7 +572,7 @@ const announcementData = [
 function Announcements() {
   return (
     <section className="py-6">
-      <div className="flex items-center gap-3 mb-8">
+      <div className="inline-flex items-center gap-3 mb-8 bg-white/55 backdrop-blur-md border border-[#A6C49F]/60 rounded-2xl px-5 py-2.5 shadow-sm">
         <FaBullhorn className="text-[#1C2E20] text-base" />
         <h2 className="text-2xl font-['Cinzel',serif] text-[#1C2E20] tracking-wider uppercase font-bold">Announcements</h2>
       </div>
@@ -638,12 +661,14 @@ function GuildRulesSection() {
   return (
     <section className="py-6">
       <div className="text-center mb-10">
-        <span className="text-[10px] tracking-[0.25em] text-[#1C2E20] uppercase font-bold block mb-1">
-          Sanctuary Covenant
-        </span>
-        <h2 className="text-3xl md:text-4xl font-['Cinzel',serif] text-[#1C2E20] font-bold tracking-wider uppercase">
-          Guild Guidelines
-        </h2>
+        <div className="inline-block bg-white/55 backdrop-blur-md border border-[#A6C49F]/60 rounded-2xl px-8 py-4 shadow-sm">
+          <span className="text-[10px] tracking-[0.25em] text-[#1C2E20] uppercase font-bold block mb-1">
+            Sanctuary Covenant
+          </span>
+          <h2 className="text-3xl md:text-4xl font-['Cinzel',serif] text-[#1C2E20] font-bold tracking-wider uppercase">
+            Guild Guidelines
+          </h2>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -686,7 +711,7 @@ const eventData = [
 function EventsCalendar() {
   return (
     <section className="py-6">
-      <div className="flex items-center gap-3 mb-8">
+      <div className="inline-flex items-center gap-3 mb-8 bg-white/55 backdrop-blur-md border border-[#A6C49F]/60 rounded-2xl px-5 py-2.5 shadow-sm">
         <FaCalendarAlt className="text-[#1C2E20] text-base" />
         <h2 className="text-2xl font-['Cinzel',serif] text-[#1C2E20] tracking-wider uppercase font-bold">Gatherings</h2>
       </div>
@@ -718,7 +743,7 @@ const wikiTopics = [
 function WikiSection() {
   return (
     <section className="py-6">
-      <div className="flex items-center gap-3 mb-8">
+      <div className="inline-flex items-center gap-3 mb-8 bg-white/55 backdrop-blur-md border border-[#A6C49F]/60 rounded-2xl px-5 py-2.5 shadow-sm">
         <FaBook className="text-[#1C2E20] text-base" />
         <h2 className="text-2xl font-['Cinzel',serif] text-[#1C2E20] tracking-wider uppercase font-bold">Field Guides</h2>
       </div>
@@ -752,7 +777,7 @@ const councilMembers = [
 function Roster() {
   return (
     <section className="py-6">
-      <div className="flex items-center gap-3 mb-8">
+      <div className="inline-flex items-center gap-3 mb-8 bg-white/55 backdrop-blur-md border border-[#A6C49F]/60 rounded-2xl px-5 py-2.5 shadow-sm">
         <FaShieldAlt className="text-[#1C2E20] text-base" />
         <h2 className="text-2xl font-['Cinzel',serif] text-[#1C2E20] tracking-wider uppercase font-bold">The Council</h2>
       </div>
