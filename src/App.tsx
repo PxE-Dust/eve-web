@@ -157,7 +157,7 @@ function FallingPetalsCanvas() {
   return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-30" />;
 }
 
-/* ---------------- DELICATE STYLIZED VINES OVERLAY ---------------- */
+/* ---------------- ORGANIC SHORT VINES (NO CONTENT BLOCKING) ---------------- */
 
 interface LeafData {
   x: number;
@@ -171,25 +171,26 @@ interface VineData {
   leaves: LeafData[];
 }
 
-function generateVine(x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, leafCount: number, scale = 1): VineData {
+function generateWavyVine(x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, leafCount: number, scale = 1): VineData {
   const leaves: LeafData[] = [];
   for (let i = 1; i < leafCount; i++) {
     const t = i / leafCount;
     const u = 1 - t;
-    const x = u * u * x0 + 2 * u * t * x1 + t * t * x2;
-    const y = u * u * y0 + 2 * u * t * y1 + t * t * y2;
+    // Add organic sine-wave offset to make the path look wavy/curvy instead of stiff math
+    const wave = Math.sin(t * Math.PI * 3) * 12;
+    const x = u * u * x0 + 2 * u * t * x1 + t * t * x2 + wave * 0.5;
+    const y = u * u * y0 + 2 * u * t * y1 + t * t * y2 + wave;
 
     const dx = 2 * u * (x1 - x0) + 2 * t * (x2 - x1);
     const dy = 2 * u * (y1 - y0) + 2 * t * (y2 - y1);
     const tangent = Math.atan2(dy, dx) * (180 / Math.PI);
 
-    // Alternate leaf directions along the vine
-    const offsetAngle = i % 2 === 0 ? 55 : -55;
+    const offsetAngle = i % 2 === 0 ? 50 + (Math.random() * 15 - 7) : -50 + (Math.random() * 15 - 7);
     leaves.push({ 
       x, 
       y, 
       angle: tangent + offsetAngle, 
-      scale: scale * (0.8 + Math.random() * 0.3) 
+      scale: scale * (0.75 + Math.random() * 0.35) 
     });
   }
   return { path: `M ${x0} ${y0} Q ${x1} ${y1} ${x2} ${y2}`, leaves };
@@ -199,38 +200,33 @@ function StylizedVineOverlay() {
   const { scrollY } = useScroll();
   const scrollVelocity = useVelocity(scrollY);
 
-  // Physics Springs reacting to scroll speed
-  const bounceY = useSpring(useTransform(scrollVelocity, [-1500, 1500], [-30, 30]), { stiffness: 40, damping: 10 });
-  const swingL = useSpring(useTransform(scrollVelocity, [-1500, 1500], [8, -8]), { stiffness: 40, damping: 10 });
-  const swingR = useSpring(useTransform(scrollVelocity, [-1500, 1500], [-8, 8]), { stiffness: 40, damping: 10 });
+  const bounceY = useSpring(useTransform(scrollVelocity, [-1500, 1500], [-15, 15]), { stiffness: 40, damping: 10 });
+  const swingL = useSpring(useTransform(scrollVelocity, [-1500, 1500], [4, -4]), { stiffness: 40, damping: 10 });
+  const swingR = useSpring(useTransform(scrollVelocity, [-1500, 1500], [-4, 4]), { stiffness: 40, damping: 10 });
 
-  // Generated static vine geometry with SHALLOW dips and SMALLER scale 
-  // to perfectly frame the site without obscuring content.
+  // Pushed outward horizontally and shortened vertically so they strictly frame the edges and never touch text
   const vines = useMemo(() => ({
-    top1: generateVine(-50, -50, 250, 120, 550, -50, 22, 0.45),
-    top2: generateVine(150, -50, 500, 180, 850, -50, 28, 0.5),
-    top3: generateVine(450, -50, 750, 140, 1050, -50, 24, 0.45),
-    top4: generateVine(800, -50, 1050, 100, 1300, -50, 18, 0.4),
-    hangL1: generateVine(30, -50, 0, 300, 20, 800, 28, 0.5),
-    hangL2: generateVine(80, -50, 40, 150, 60, 450, 16, 0.4),
-    hangR1: generateVine(1170, -50, 1200, 300, 1180, 800, 28, 0.5),
-    hangR2: generateVine(1120, -50, 1160, 150, 1140, 450, 16, 0.4),
+    top1: generateWavyVine(-50, -30, 250, 70, 550, -30, 18, 0.4),
+    top2: generateWavyVine(200, -30, 500, 100, 800, -30, 20, 0.42),
+    top3: generateWavyVine(500, -30, 750, 70, 1050, -30, 18, 0.4),
+    // Shortened side vines (only go down ~350px instead of deep into content)
+    hangL1: generateWavyVine(20, -30, -10, 150, 10, 320, 14, 0.4),
+    hangR1: generateWavyVine(1180, -30, 1210, 150, 1190, 320, 14, 0.4),
   }), []);
 
-  // Shared leaf definition to map across all vines
   const LeafShape = (
     <g id="stylized-leaf">
-      <path d="M 0 0 C 15 -22, 35 -22, 50 0 C 35 22, 15 22, 0 0 Z" fill="#9CD870" stroke="#111" strokeWidth="2.5" strokeLinejoin="round" />
-      <path d="M 0 0 L 48 0" stroke="#111" strokeWidth="2" strokeLinecap="round" />
-      <path d="M 10 0 L 18 -10 M 10 0 L 18 10" stroke="#111" strokeWidth="2" strokeLinecap="round" />
-      <path d="M 22 0 L 32 -11 M 22 0 L 32 11" stroke="#111" strokeWidth="2" strokeLinecap="round" />
-      <path d="M 34 0 L 42 -9 M 34 0 L 42 9" stroke="#111" strokeWidth="2" strokeLinecap="round" />
+      <path d="M 0 0 C 12 -18, 30 -18, 42 0 C 30 18, 12 18, 0 0 Z" fill="#9CD870" stroke="#111" strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M 0 0 L 40 0" stroke="#111" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M 8 0 L 15 -8 M 8 0 L 15 8" stroke="#111" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M 18 0 L 26 -9 M 18 0 L 26 9" stroke="#111" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M 28 0 L 35 -7 M 28 0 L 35 7" stroke="#111" strokeWidth="1.6" strokeLinecap="round" />
     </g>
   );
 
-  const renderVineGroup = (data: VineData, thickness = 2.5) => (
+  const renderVineGroup = (data: VineData) => (
     <>
-      <path d={data.path} stroke="#111" strokeWidth={thickness} fill="none" strokeLinecap="round" />
+      <path d={data.path} stroke="#111" strokeWidth={2.2} fill="none" strokeLinecap="round" />
       {data.leaves.map((l, i) => (
         <use key={i} href="#stylized-leaf" transform={`translate(${l.x} ${l.y}) rotate(${l.angle}) scale(${l.scale})`} />
       ))}
@@ -242,30 +238,23 @@ function StylizedVineOverlay() {
       <svg className="absolute top-0 left-0 w-full h-screen" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMin slice">
         <defs>{LeafShape}</defs>
 
-        {/* TOP SWOOPING CANOPY (Bounces up and down on scroll) */}
-        <motion.g style={{ y: bounceY }} animate={{ y: [0, 8, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
+        {/* TOP CANOPY ARCH */}
+        <motion.g style={{ y: bounceY }} animate={{ y: [0, 4, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
           {renderVineGroup(vines.top1)}
           {renderVineGroup(vines.top3)}
-          {renderVineGroup(vines.top4)}
-          <motion.g animate={{ y: [0, 6, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}>
+          <motion.g animate={{ y: [0, 4, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}>
             {renderVineGroup(vines.top2)}
           </motion.g>
         </motion.g>
 
-        {/* LEFT HANGING VINES (Swings left/right on scroll) */}
-        <motion.g style={{ rotate: swingL, transformOrigin: "30px 0px" }} animate={{ rotate: [0, 1.5, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}>
+        {/* SHORT LEFT HANGING VINE */}
+        <motion.g style={{ rotate: swingL, transformOrigin: "20px 0px" }} animate={{ rotate: [0, 1, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}>
           {renderVineGroup(vines.hangL1)}
-          <motion.g animate={{ rotate: [0, -1, 0] }} transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }} style={{ transformOrigin: "80px 0px" }}>
-            {renderVineGroup(vines.hangL2)}
-          </motion.g>
         </motion.g>
 
-        {/* RIGHT HANGING VINES (Swings left/right on scroll) */}
-        <motion.g style={{ rotate: swingR, transformOrigin: "1170px 0px" }} animate={{ rotate: [0, -1.5, 0] }} transition={{ duration: 7.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}>
+        {/* SHORT RIGHT HANGING VINE */}
+        <motion.g style={{ rotate: swingR, transformOrigin: "1180px 0px" }} animate={{ rotate: [0, -1, 0] }} transition={{ duration: 7.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}>
           {renderVineGroup(vines.hangR1)}
-          <motion.g animate={{ rotate: [0, 1, 0] }} transition={{ duration: 6.8, repeat: Infinity, ease: "easeInOut", delay: 0.7 }} style={{ transformOrigin: "1120px 0px" }}>
-            {renderVineGroup(vines.hangR2)}
-          </motion.g>
         </motion.g>
       </svg>
     </div>
@@ -288,10 +277,9 @@ export default function App() {
 
   return (
     <div className="relative bg-[#EFF4EC] text-[#273229] min-h-screen antialiased overflow-x-hidden font-['Plus_Jakarta_Sans',sans-serif]">
-      {/* 1. Scaled, delicate vines overlay */}
+      {/* Shortened, organic, content-safe framing vines */}
       <StylizedVineOverlay />
       
-      {/* 2. Soft background gradient shift */}
       <motion.div
         style={{ y: bgY }}
         className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(194,214,188,0.5),rgba(239,244,236,0.98))] z-0 pointer-events-none"
@@ -299,7 +287,6 @@ export default function App() {
 
       <Navbar />
 
-      {/* 3. Main Text Content */}
       <main className="relative z-10 max-w-4xl mx-auto px-6">
         <ScrollFocusSection>
           <Hero />
@@ -342,7 +329,6 @@ export default function App() {
         </ScrollFocusSection>
       </main>
 
-      {/* 4. Subtle, interactive ambient petal physics layer */}
       <FallingPetalsCanvas />
 
       <Footer />
