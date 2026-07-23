@@ -735,9 +735,9 @@ function EventsCalendar() {
 /* ---------------- WIKI ---------------- */
 
 const wikiTopics = [
-  { title: "Alchemy & Elixirs Guide", desc: "Required pots, food feasts, and elemental blessings for raid night." },
-  { title: "Sanctuary Bank Protocols", desc: "Sharing harvests, requesting gear, and contributing raw materials." },
-  { title: "Class Build Library", desc: "Member-crafted build guides for optimization without toxicity." },
+  { title: "Coming Soon...", desc: "Check back later for an update!" },
+  { title: "Coming Soon...", desc: "Check back later for an update!" },
+  { title: "Coming Soon...", desc: "Check back later for an update!" },
 ];
 
 function WikiSection() {
@@ -749,9 +749,9 @@ function WikiSection() {
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
-        {wikiTopics.map((w) => (
+        {wikiTopics.map((w, i) => (
           <div
-            key={w.title}
+            key={i}
             className="p-6 rounded-2xl bg-white border border-[#A6C49F] shadow-sm hover:shadow-md transition"
           >
             <h3 className="text-base font-['Cinzel',serif] font-bold mb-2 text-[#1C2E20]">{w.title}</h3>
