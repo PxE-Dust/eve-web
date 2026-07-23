@@ -477,7 +477,7 @@ function Navbar() {
           {[
             { id: "announcements", label: "News" },
             { id: "rules", label: "Guidelines" },
-            { id: "events", label: "Gatherings" },
+            { id: "events", label: "Guild Events" },
             { id: "wiki", label: "Guides" },
             { id: "roster", label: "The Council" },
             { id: "join", label: "Join" },
@@ -703,9 +703,9 @@ function GuildRulesSection() {
 /* ---------------- EVENTS / CALENDAR ---------------- */
 
 const eventData = [
-  { title: "Main Expedition: Progression", time: "Fri · 8:00 PM EST", requirements: "ilvl 620+ · Consumables Provided" },
-  { title: "Catch-up Raid & Dungeons", time: "Sat · 6:00 PM EST", requirements: "Open to All Guild Members" },
-  { title: "Sanctuary Tea & Lounge", time: "Tue · 9:00 PM EST", requirements: "Casual · Open Voice Chat" },
+  { title: "Coming Soon...", time: "TBD", requirements: "Check back later for an update!" },
+  { title: "Coming Soon...", time: "TBD", requirements: "Check back later for an update!" },
+  { title: "Coming Soon...", time: "TBD", requirements: "Check back later for an update!" },
 ];
 
 function EventsCalendar() {
@@ -713,13 +713,13 @@ function EventsCalendar() {
     <section className="py-6">
       <div className="inline-flex items-center gap-3 mb-8 bg-white/55 backdrop-blur-md border border-[#A6C49F]/60 rounded-2xl px-5 py-2.5 shadow-sm">
         <FaCalendarAlt className="text-[#1C2E20] text-base" />
-        <h2 className="text-2xl font-['Cinzel',serif] text-[#1C2E20] tracking-wider uppercase font-bold">Gatherings</h2>
+        <h2 className="text-2xl font-['Cinzel',serif] text-[#1C2E20] tracking-wider uppercase font-bold">Guild Events</h2>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
-        {eventData.map((e) => (
+        {eventData.map((e, i) => (
           <div
-            key={e.title}
+            key={i}
             className="p-6 rounded-2xl bg-white border border-[#A6C49F] shadow-sm hover:shadow-md transition hover:-translate-y-1"
           >
             <span className="text-[10px] tracking-widest font-bold text-[#2F4832] block mb-2 uppercase">{e.time}</span>
