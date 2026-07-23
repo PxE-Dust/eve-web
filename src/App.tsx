@@ -511,7 +511,7 @@ function Hero() {
             enough open counters that leaves were showing straight through */}
         <motion.div
           variants={fadeUp}
-          className="inline-block bg-white/55 backdrop-blur-md border border-[#A6C49F]/60 rounded-[2rem] px-8 py-6 md:px-14 md:py-8 shadow-sm mb-6"
+          className="block w-fit mx-auto bg-white/55 backdrop-blur-md border border-[#A6C49F]/60 rounded-[2rem] px-8 py-6 md:px-14 md:py-8 shadow-sm mb-6"
         >
           <p className="font-['Alex_Brush',cursive] text-4xl md:text-5xl text-[#2F4832] mb-1 font-semibold">
             Enjoy Your Time at
