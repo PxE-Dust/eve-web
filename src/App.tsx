@@ -562,10 +562,10 @@ const announcementData = [
     summary: "We finally launched our first site! Check back here for guild related updates.",
   },
   {
-    title: "Sanctuary Reserves Replenished",
+    title: "Participation Requirements",
     date: "July 15, 2026",
-    tag: "Pantry & Vault",
-    summary: "Free raid flasks, elixirs, and food feasts have been restocked in the Vault for all participating adventurers.",
+    tag: "Guideline Update",
+    summary: "We have updated participation guidelines to require 1000 points of activity per week.",
   },
 ];
 
