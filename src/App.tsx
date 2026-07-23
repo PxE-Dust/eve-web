@@ -556,10 +556,10 @@ function Hero() {
 
 const announcementData = [
   {
-    title: "Summer Solstice Gathering & Raid Launch",
-    date: "July 20, 2026",
+    title: "Website Launch",
+    date: "July 22, 2026",
     tag: "Guild Event",
-    summary: "Our journey into the new season begins this Friday! Join us in the voice lounge for pre-expedition tea and preparations.",
+    summary: "We finally launched our first site! Check back here for guild related updates.",
   },
   {
     title: "Sanctuary Reserves Replenished",
