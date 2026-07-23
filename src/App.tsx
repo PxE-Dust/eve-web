@@ -502,10 +502,6 @@ function Hero() {
   return (
     <section className="pt-40 pb-12 text-center relative z-10 max-w-3xl mx-auto">
       <motion.div variants={stagger} initial="hidden" animate="visible">
-        <motion.div variants={fadeUp} className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full bg-white border border-[#A6C49F] text-[#1C2E20] text-[11px] font-bold tracking-[0.18em] uppercase shadow-sm">
-          <span className="text-xs">✦</span> Sanctuary & Guild
-        </motion.div>
-
         {/* Frosted glass panel behind the headline group — the vines sit
             behind the whole page, and script/serif type this size has
             enough open counters that leaves were showing straight through */}
@@ -524,6 +520,10 @@ function Hero() {
           <p className="font-['Cormorant_Garamond',serif] italic text-2xl md:text-3xl text-[#1C2E20] max-w-xl mx-auto font-bold">
             "We Welcome All"
           </p>
+        </motion.div>
+
+        <motion.div variants={fadeUp} className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full bg-white border border-[#A6C49F] text-[#1C2E20] text-[11px] font-bold tracking-[0.18em] uppercase shadow-sm">
+          <span className="text-xs">✦</span> Sanctuary & Guild
         </motion.div>
 
         <motion.p
